@@ -21,6 +21,13 @@ class MyApp extends StatelessWidget {
   }
 }
 
+enum PlayStyle {
+  pass,
+  press,
+  counter,
+  none,
+}
+
 class Team {
   Team({
     required this.name,
@@ -36,6 +43,8 @@ class Team {
     required this.att,
     required this.mid,
     required this.def,
+     this.playStyle = PlayStyle.none,
+     this.attPercent = 0.5,
   });
   final String name;
   int pts;
@@ -53,6 +62,8 @@ class Team {
   int att;
   int mid;
   int def;
+  double attPercent;
+  PlayStyle playStyle;
 
   @override
   String toString() {
@@ -93,7 +104,14 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _autoPlay = false;
   bool _finishedLeague = true;
 
-  Team createTeam({required int max, int min = 0, required String name}) {
+  Team createTeam({
+    required int max,
+    int min = 0,
+    required String name,
+    attBonus = 1,
+    midBonus = 1,
+    defBonus = 1,
+  }) {
     return Team(
       name: name,
       att: Random().nextInt(max - min) + min,
