@@ -1,22 +1,40 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:leage_simulator/components/game_card.dart';
+import 'package:leage_simulator/components/league_table.dart';
+import 'package:leage_simulator/page/record_detail.dart';
 
 void main() {
   runApp(const MyApp());
 }
+
+final _router = GoRouter(
+  routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const MyHomePage(),
+    ),
+    GoRoute(
+        path: '/record_detail',
+        builder: (context, state) {
+          return RecordDetailPage(teams: state.extra as List<Team>);
+        }),
+  ],
+);
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      routerConfig: _router,
     );
   }
 }
@@ -39,21 +57,29 @@ class Team {
     this.ga = 0,
     this.gd = 0,
     this.winStack = 0,
+    this.noLoseStack = 0,
     this.loseStack = 0,
+    this.noWinStack = 0,
     required this.att,
     required this.mid,
     required this.def,
-     this.playStyle = PlayStyle.none,
-     this.attPercent = 0.5,
-  });
+    this.playStyle = PlayStyle.none,
+    this.attPercent = 0.5,
+    this.fundamental = 0,
+  }) {
+    if (fundamental > 100) fundamental = 100;
+  }
   final String name;
+  int fundamental;
   int pts;
   int won;
   int drawn;
   int lost;
 
   int winStack;
+  int noLoseStack;
   int loseStack;
+  int noWinStack;
 
   int gf;
   int ga;
@@ -65,6 +91,36 @@ class Team {
   double attPercent;
   PlayStyle playStyle;
 
+  calcPts() {
+    pts = won * 3 + drawn;
+  }
+
+  win() {
+    won++;
+    winStack++;
+    noLoseStack++;
+    noWinStack = 0;
+    loseStack = 0;
+    calcPts();
+  }
+
+  draw() {
+    drawn++;
+    noLoseStack++;
+    noWinStack++;
+    winStack = 0;
+    loseStack = 0;
+    calcPts();
+  }
+
+  lose() {
+    lost++;
+    loseStack++;
+    noWinStack++;
+    noLoseStack = 0;
+    winStack = 0;
+  }
+
   @override
   String toString() {
     return '$name , $won , $drawn , $lost';
@@ -72,20 +128,18 @@ class Team {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class Match {
+class Game {
   final Team team1;
   final Team team2;
   int team1Score;
   int team2Score;
-  Match({
+  Game({
     required this.team1,
     required this.team2,
     this.team1Score = 0,
@@ -99,58 +153,132 @@ class Match {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _round = 0;
-  List<List<Match>> _matchs = [];
+  List<List<Game>> _matchs = [];
   bool _finishedRound = false;
   bool _autoPlay = false;
+  bool _autoPlayFast = false;
+  bool _showMainGame = false;
   bool _finishedLeague = true;
+  bool _showDetail = true;
+  Duration _autoPlaySpeed = const Duration(milliseconds: 300);
 
   Team createTeam({
-    required int max,
-    int min = 0,
     required String name,
-    attBonus = 1,
-    midBonus = 1,
-    defBonus = 1,
+    required int att,
+    required int mid,
+    required int def,
+    fundamental = 0,
+    double attPercent = 0.5,
   }) {
     return Team(
       name: name,
-      att: Random().nextInt(max - min) + min,
-      def: Random().nextInt(max - min) + min,
-      mid: Random().nextInt(max - min) + min,
+      att: att,
+      def: def,
+      mid: mid,
+      attPercent: attPercent,
+      fundamental: fundamental,
     );
   }
 
-  List<Team> teamData = [];
+  List<Team> _teams = [];
+
+  List<List<Team>> _record = [];
+
+  allReset() {
+    _teams = [];
+    _record = [];
+    _matchs = [];
+    _finishedRound = false;
+    _finishedLeague = true;
+
+    creatRound();
+    setState(() {});
+  }
 
   @override
   void initState() {
-    teamSetting();
+    creatRound();
     super.initState();
   }
 
+  final List<String> _teamData = [
+    '토트넘',
+    '맨시티',
+    '아스날',
+    '리버풀',
+    '아스톤빌라',
+    '뉴캐슬',
+    '브라이튼',
+    '맨유',
+    '웨스트햄',
+    '첼시',
+    '크팰',
+    '울버햄튼',
+    '풀럼',
+    '브랜트포드',
+    '노팅엄',
+    '에버턴',
+    '루턴',
+    '번리',
+    '본머스',
+    '쉐필드',
+  ];
+
   void teamSetting() {
-    teamData = [
-      createTeam(name: '토트넘', max: 600, min: 250),
-      createTeam(name: '맨시티', max: 800, min: 300),
-      createTeam(name: '아스날', max: 750, min: 400),
-      createTeam(name: '리버풀', max: 800, min: 350),
-      createTeam(name: '아스톤빌라', max: 400, min: 200),
-      createTeam(name: '뉴캐슬', max: 550, min: 300),
-      createTeam(name: '브라이튼', max: 350, min: 300),
-      createTeam(name: '맨유', max: 650, min: 250),
-      createTeam(name: '웨스트햄', max: 500),
-      createTeam(name: '첼시', max: 650, min: 250),
-      createTeam(name: '크팰', max: 300),
-      createTeam(name: '울버햄튼', max: 500),
-      createTeam(name: '풀럼', max: 500),
-      createTeam(name: '브랜트포드', max: 500),
-      createTeam(name: '노팅엄', max: 200),
-      createTeam(name: '에버턴', max: 200),
-      createTeam(name: '루턴', max: 200),
-      createTeam(name: '번리', max: 400),
-      createTeam(name: '본머스', max: 200),
-      createTeam(name: '쉐필드', max: 200),
-    ];
+    if (_teams.isEmpty) {
+      _teams = [
+        createTeam(name: '토트넘', att: 80, mid: 50, def: 60, fundamental: 20),
+        createTeam(name: '맨시티', att: 90, mid: 90, def: 90, fundamental: 30),
+        createTeam(name: '아스날', att: 90, mid: 80, def: 100, fundamental: 60),
+        createTeam(name: '리버풀', att: 100, mid: 70, def: 80, fundamental: 60),
+        createTeam(name: '아스톤빌라', att: 50, mid: 50, def: 50),
+        createTeam(name: '뉴캐슬', att: 50, mid: 50, def: 50, fundamental: 10),
+        createTeam(name: '브라이튼', att: 50, mid: 50, def: 50),
+        createTeam(name: '맨유', att: 40, mid: 40, def: 40, fundamental: 70),
+        createTeam(name: '웨스트햄', att: 40, mid: 40, def: 40),
+        createTeam(name: '첼시', att: 40, mid: 40, def: 40, fundamental: 20),
+        createTeam(name: '크팰', att: 35, mid: 35, def: 35),
+        createTeam(name: '울버햄튼', att: 35, mid: 35, def: 35),
+        createTeam(name: '풀럼', att: 50, mid: 30, def: 30, attPercent: 0.8),
+        createTeam(name: '브랜트포드', att: 30, mid: 30, def: 30, attPercent: 0.1),
+        createTeam(name: '노팅엄', att: 30, mid: 30, def: 30),
+        createTeam(name: '에버턴', att: 30, mid: 30, def: 30),
+        createTeam(name: '루턴', att: 30, mid: 20, def: 20),
+        createTeam(name: '번리', att: 20, mid: 20, def: 40, attPercent: 0.2),
+        createTeam(name: '본머스', att: 20, mid: 20, def: 20),
+        createTeam(name: '쉐필드', att: 20, mid: 20, def: 20),
+      ];
+    } else {
+      int index = 0;
+      _teams = _teams.map((team) {
+        int fundamental = team.fundamental > 80 ? team.fundamental - 5 : team.fundamental;
+
+        if (index == 0) {
+          fundamental = fundamental + 5;
+        } else if (index == 1) {
+          fundamental = fundamental + 3;
+        } else if (index < 4) {
+          fundamental = fundamental + 2;
+        } else if (index < 6) {
+          fundamental = fundamental + 1;
+        }
+
+        int rowRankBonus = (++index * 0.58).floor();
+        int fundermantalBonus = (team.fundamental / 5.2).floor();
+
+        int att = team.att + Random().nextInt(5 + fundermantalBonus) - (8 + Random().nextInt(max(fundermantalBonus - 13, 1))) + rowRankBonus;
+        int mid = team.mid + Random().nextInt(5 + fundermantalBonus) - (8 + Random().nextInt(max(fundermantalBonus - 13, 1))) + rowRankBonus;
+        int def = team.def + Random().nextInt(5 + fundermantalBonus) - (8 + Random().nextInt(max(fundermantalBonus - 13, 1))) + rowRankBonus;
+
+        return Team(
+          name: team.name,
+          att: min(max(att, 0), 200),
+          mid: min(max(mid, 0), 200),
+          def: min(max(def, 0), 200),
+          fundamental: min(fundamental, 100),
+        );
+      }).toList();
+    }
   }
 
   void creatRound() {
@@ -158,10 +286,14 @@ class _MyHomePageState extends State<MyHomePage> {
       teamSetting();
       _finishedRound = false;
       _round = 0;
-      _matchs = roundRobin(teams: teamData);
+      _matchs = roundRobin(teams: _teams);
       _matchs.shuffle();
       setState(() {});
       _finishedLeague = false;
+
+      if (_autoPlay) {
+        playGame();
+      }
     }
   }
 
@@ -176,14 +308,19 @@ class _MyHomePageState extends State<MyHomePage> {
         if (_matchs.length - 1 == _round) _finishedLeague = true;
       });
 
+      if (_round == 37) {
+        _record.add(_teams);
+        creatRound();
+      }
+
       if (_autoPlay) {
         playGame();
       }
     }
   }
 
-  List<List<Match>> roundRobin({required List teams}) {
-    List<List<Match>> res = [];
+  List<List<Game>> roundRobin({required List teams}) {
+    List<List<Game>> res = [];
 
     int n = teams.length;
     if (n % 2 != 0) {
@@ -192,10 +329,10 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     for (int round = 0; round < (n - 1) * 2; round++) {
-      List<Match> rounds = [];
+      List<Game> rounds = [];
 
       for (int i = 0; i < n / 2; i++) {
-        rounds.add(Match(team1: teams[i], team2: teams[n - 1 - i]));
+        rounds.add(Game(team1: teams[i], team2: teams[n - 1 - i]));
       }
 
       rounds.shuffle();
@@ -209,20 +346,24 @@ class _MyHomePageState extends State<MyHomePage> {
     return res;
   }
 
-  playGame() {
+  playGame() async {
     if (!_finishedRound) {
-      List<Match> matchs = _matchs[_round];
+      List<Game> matchs = _matchs[_round];
 
       _matchs[_round] = matchs.map((match) => game(match: match)).toList();
 
-      print(teamData);
       setState(() {
         _finishedRound = true;
       });
+
+      if (_autoPlay) {
+        await Future.delayed(_autoPlaySpeed);
+        nextRound();
+      }
     }
   }
 
-  Match game({required Match match}) {
+  Game game({required Game match}) {
     Team team1 = match.team1;
     Team team2 = match.team2;
     double ranNum = Random().nextDouble();
@@ -278,44 +419,31 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
 
+    team1Att = team1Att * (0.2 + team1.attPercent);
+    team1Def = team1Def * (1.1 - team1.attPercent);
+
+    team2Att = team2Att * (0.2 + team2.attPercent);
+    team2Def = team2Def * (1.1 - team2.attPercent);
+
     List.generate(10, (index) {
       ranNum = Random().nextDouble();
-      bool team1Goal = team1Att / (team1Att + team2Def) > ranNum;
+      bool team1Goal = team1Att / (team1Att + team2Def + team1Score * 40) > ranNum;
       ranNum = Random().nextDouble();
-      bool team2Goal = team2Att / (team2Att + team1Def) > ranNum;
+      bool team2Goal = team2Att / (team2Att + team1Def + team2Score * 40) > ranNum;
 
       if (team1Goal) team1Score++;
       if (team2Goal) team2Score++;
     });
 
     if (team1Score > team2Score) {
-      match.team1.won += 1;
-      match.team1.pts += 3;
-      match.team1.winStack += 1;
-      match.team1.loseStack = 0;
-
-      match.team2.loseStack += 1;
-      match.team2.winStack = 0;
-      match.team2.lost += 1;
+      match.team1.win();
+      match.team2.lose();
     } else if (team1Score < team2Score) {
-      match.team2.won += 1;
-      match.team2.pts += 3;
-      match.team2.winStack += 1;
-      match.team2.loseStack = 0;
-
-      match.team1.loseStack += 1;
-      match.team1.winStack = 0;
-      match.team1.lost += 1;
+      match.team2.win();
+      match.team1.lose();
     } else {
-      match.team2.drawn += 1;
-      match.team1.drawn += 1;
-      match.team1.pts += 1;
-      match.team2.pts += 1;
-
-      match.team1.winStack = 0;
-      match.team1.loseStack = 0;
-      match.team2.winStack = 0;
-      match.team2.loseStack = 0;
+      match.team2.draw();
+      match.team1.draw();
     }
 
     match.team1.gf += team1Score;
@@ -329,7 +457,7 @@ class _MyHomePageState extends State<MyHomePage> {
     match.team1Score = team1Score;
     match.team2Score = team2Score;
 
-    teamData.sort((a, b) {
+    _teams.sort((a, b) {
       if (a.pts == b.pts) {
         return a.gd > b.gd ? 0 : 1;
       } else {
@@ -340,239 +468,176 @@ class _MyHomePageState extends State<MyHomePage> {
     return match;
   }
 
+  Iterable<Game> getMainGames({required List<Game> games}) {
+    if (!_showMainGame) return games;
+    findIndex({required Team target}) => _teams.indexWhere((team) => team.name == target.name);
+
+    List<Game> mainGames = [...games.where((game) => findIndex(target: game.team1) < 5 || findIndex(target: game.team2) < 5)];
+
+    mainGames.sort((a, b) {
+      return max(a.team1.pts, a.team2.pts) > max(b.team1.pts, b.team2.pts) ? 0 : 1;
+    });
+
+    return mainGames;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Column(children: [
-        Expanded(
-          child: Container(
-            child: Column(
-              children: [
-                Text(
-                  'Round : ${_round + 1}',
-                  style: const TextStyle(fontSize: 25),
-                ),
-                if (_matchs.isNotEmpty)
-                  ..._matchs[_round]
-                      .map(
-                        (match) => Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: MatchCard(match: match, showScore: _finishedRound),
-                        ),
-                      )
-                      .toList(),
-                const Row(),
-                Container(
-                  height: 200,
-                  child: ListView.builder(
-                    itemCount: teamData.length,
-                    itemBuilder: (context, index) => Row(children: [
-                      SizedBox(
-                        width: 70,
-                        child: Text(teamData[index].name),
-                      ),
-                      SizedBox(
-                        width: 60,
-                        child: Text(
-                          'pts: ${teamData[index].pts}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 40,
-                        child: Text(
-                          'W: ${teamData[index].won}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 40,
-                        child: Text(
-                          'D: ${teamData[index].drawn}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 40,
-                        child: Text(
-                          'L: ${teamData[index].lost}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 50,
-                        child: Text(
-                          'gf: ${teamData[index].gf}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 50,
-                        child: Text(
-                          'ga: ${teamData[index].ga}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 50,
-                        child: Text(
-                          'gd: ${teamData[index].gd}',
-                          style: const TextStyle(fontSize: 11),
-                        ),
-                      ),
-                    ]),
-                  ),
-                )
-              ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 60),
+            Text(
+              'Round : ${_round + 1}',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-          ),
-        ),
-        Checkbox(
-            value: _autoPlay,
-            onChanged: (check) {
-              setState(() {
-                _autoPlay = check ?? false;
-              });
-            }),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20).add(
-            const EdgeInsets.only(bottom: 40),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: creatRound,
-                  child: const Text('대진표 생성'),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  const SizedBox(
+                    width: 16,
+                  ),
+                  const Text('자동진행'),
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: Checkbox(
+                        value: _autoPlay,
+                        onChanged: (check) {
+                          setState(() {
+                            _autoPlay = check ?? false;
+                          });
+                        }),
+                  ),
+                  const Text('fast'),
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: Checkbox(
+                        value: _autoPlayFast,
+                        onChanged: (check) {
+                          setState(() {
+                            _autoPlayFast = check ?? false;
+                            if (_autoPlayFast) {
+                              _autoPlaySpeed = const Duration(milliseconds: 10);
+                            } else {
+                              _autoPlaySpeed = const Duration(milliseconds: 300);
+                            }
+                          });
+                        }),
+                  ),
+                  const Text('주요 경기만 보기'),
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: Checkbox(
+                        value: _showMainGame,
+                        onChanged: (check) {
+                          setState(() {
+                            _showMainGame = check ?? false;
+                          });
+                        }),
+                  ),
+                  const Text('상세정보'),
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: Checkbox(
+                        value: _showDetail,
+                        onChanged: (check) {
+                          setState(() {
+                            _showDetail = check ?? false;
+                          });
+                        }),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeIn,
+                height: _showDetail ? (_showMainGame ? 300 : 600) : (_showMainGame ? 195 : 390),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      if (_matchs.isNotEmpty)
+                        ...getMainGames(games: _matchs[_round])
+                            .map(
+                              (match) => Padding(
+                                padding: const EdgeInsets.only(top: 12),
+                                child: GameCard(
+                                  game: match,
+                                  isPlayed: _finishedRound,
+                                  showDetail: _showDetail,
+                                  teams: _teams,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      const Row(),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(
-                width: 15,
-              ),
-              Expanded(
-                child: ElevatedButton(onPressed: playGame, child: const Text('라운드 진행')),
-              ),
-              const SizedBox(
-                width: 15,
-              ),
-              Expanded(
-                child: ElevatedButton(onPressed: nextRound, child: const Text('다음 라운드')),
-              ),
-            ],
-          ),
-        )
-      ]),
+            ),
+            LeageTable(teams: _teams),
+            ..._record
+                .map((record) => GestureDetector(
+                      onTap: () {
+                        context.push('/record_detail', extra: record);
+                      },
+                      child: Row(
+                        children: [
+                          Text('우승:${record[0].name}/${record[0].pts}'),
+                          Text('준우승:${record[1].name}/${record[1].pts}'),
+                          Text('3위:${record[2].name}/${record[2].pts}'),
+                          Text('4위:${record[3].name}/${record[3].pts}'),
+                        ],
+                      ),
+                    ))
+                .toList(),
+            const SizedBox(
+              height: 100,
+            )
+          ],
+        ),
+      ),
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(boxShadow: [
+          BoxShadow(
+            blurRadius: 5,
+            spreadRadius: 5,
+            color: Color.fromARGB(33, 79, 79, 79),
+            blurStyle: BlurStyle.normal,
+          )
+        ], color: Colors.white),
+        padding: const EdgeInsets.symmetric(horizontal: 20).add(
+          const EdgeInsets.only(bottom: 32, top: 8),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: ElevatedButton(onPressed: allReset, child: const Icon(Icons.refresh)),
+            ),
+            const SizedBox(
+              width: 12,
+            ),
+            Expanded(
+              child: ElevatedButton(onPressed: playGame, child: const Text('라운드 진행')),
+            ),
+            const SizedBox(
+              width: 12,
+            ),
+            Expanded(
+              child: ElevatedButton(onPressed: nextRound, child: const Text('다음 라운드')),
+            ),
+          ],
+        ),
+      ),
     );
-  }
-}
-
-class MatchCard extends StatelessWidget {
-  const MatchCard({super.key, required this.showScore, required this.match});
-  final bool showScore;
-  final Match match;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        TeamCard(
-          team: match.team1,
-          accent: [if (match.team1Score > match.team2Score) Accent.name],
-        ),
-        if (showScore)
-          Text(
-            '${match.team1Score}',
-            // style: TextStyle(color: (match.team1Score > match.team2Score) ? Colors.red : null),
-          ),
-        const Text('vs'),
-        if (showScore)
-          Text(
-            '${match.team2Score}',
-            // style: TextStyle(color: (match.team2Score > match.team1Score) ? Colors.red : null),
-          ),
-        TeamCard(
-          team: match.team2,
-          accent: [if (match.team2Score > match.team1Score) Accent.name],
-          nameFirst: true,
-        ),
-      ],
-    );
-  }
-}
-
-enum Accent {
-  name,
-  att,
-  mid,
-  def,
-}
-
-class TeamCard extends StatelessWidget {
-  const TeamCard({super.key, required this.team, this.nameFirst = false, this.accent = const []});
-  final Team team;
-  final bool nameFirst;
-  final List<Accent> accent;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(children: [
-      if (nameFirst) ...[
-        Text(
-          team.name,
-          style: TextStyle(
-            fontSize: 17,
-            color: accent.contains(Accent.name) ? Colors.red : null,
-          ),
-        ),
-        const Text('('),
-        Text(
-          '${team.winStack}',
-          style: team.winStack > 3 ? const TextStyle(color: Colors.red) : null,
-        ),
-        const Text(','),
-        Text(
-          '${team.loseStack}',
-          style: team.loseStack > 3 ? const TextStyle(color: Colors.blue) : null,
-        ),
-        const Text(')'),
-      ],
-      Text(
-        '${team.att}/',
-        style: const TextStyle(fontSize: 10),
-      ),
-      Text(
-        '${team.mid}/',
-        style: const TextStyle(fontSize: 10),
-      ),
-      Text(
-        '${team.def}',
-        style: const TextStyle(fontSize: 10),
-      ),
-      if (!nameFirst) ...[
-        Text(
-          team.name,
-          style: TextStyle(
-            fontSize: 17,
-            color: accent.contains(Accent.name) ? Colors.red : null,
-          ),
-        ),
-        const Text('('),
-        Text(
-          '${team.winStack}',
-          style: team.winStack > 3 ? const TextStyle(color: Colors.red) : null,
-        ),
-        const Text(','),
-        Text(
-          '${team.loseStack}',
-          style: team.loseStack > 3 ? const TextStyle(color: Colors.blue) : null,
-        ),
-        const Text(')'),
-      ],
-    ]);
   }
 }
