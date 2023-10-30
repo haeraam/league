@@ -65,12 +65,10 @@ class Team {
     required this.def,
     this.playStyle = PlayStyle.none,
     this.attPercent = 0.5,
-    this.fundamental = 0,
-  }) {
-    if (fundamental > 100) fundamental = 100;
-  }
+    this.fundamental = 0.0,
+  });
   final String name;
-  int fundamental;
+  double fundamental;
   int pts;
   int won;
   int drawn;
@@ -167,9 +165,10 @@ class _MyHomePageState extends State<MyHomePage> {
     required int att,
     required int mid,
     required int def,
-    fundamental = 0,
+    fundamental = 1.0,
     double attPercent = 0.5,
   }) {
+    if (fundamental is int) fundamental = fundamental.toDouble();
     return Team(
       name: name,
       att: att,
@@ -227,56 +226,103 @@ class _MyHomePageState extends State<MyHomePage> {
   void teamSetting() {
     if (_teams.isEmpty) {
       _teams = [
-        createTeam(name: '토트넘', att: 80, mid: 50, def: 60, fundamental: 20),
-        createTeam(name: '맨시티', att: 90, mid: 90, def: 90, fundamental: 30),
-        createTeam(name: '아스날', att: 90, mid: 80, def: 100, fundamental: 60),
-        createTeam(name: '리버풀', att: 100, mid: 70, def: 80, fundamental: 60),
+        createTeam(name: '토트넘', att: 80, mid: 50, def: 60),
+        createTeam(name: '맨시티', att: 90, mid: 90, def: 90),
+        createTeam(name: '아스날', att: 90, mid: 80, def: 100, fundamental: 10),
+        createTeam(name: '리버풀', att: 100, mid: 70, def: 80, fundamental: 10),
         createTeam(name: '아스톤빌라', att: 50, mid: 50, def: 50),
-        createTeam(name: '뉴캐슬', att: 50, mid: 50, def: 50, fundamental: 10),
+        createTeam(name: '뉴캐슬', att: 50, mid: 50, def: 50),
         createTeam(name: '브라이튼', att: 50, mid: 50, def: 50),
-        createTeam(name: '맨유', att: 40, mid: 40, def: 40, fundamental: 70),
+        createTeam(name: '맨유', att: 40, mid: 40, def: 40, fundamental: 10),
         createTeam(name: '웨스트햄', att: 40, mid: 40, def: 40),
-        createTeam(name: '첼시', att: 40, mid: 40, def: 40, fundamental: 20),
+        createTeam(name: '첼시', att: 40, mid: 40, def: 40, fundamental: 10),
         createTeam(name: '크팰', att: 35, mid: 35, def: 35),
         createTeam(name: '울버햄튼', att: 35, mid: 35, def: 35),
-        createTeam(name: '풀럼', att: 50, mid: 30, def: 30, attPercent: 0.8),
-        createTeam(name: '브랜트포드', att: 30, mid: 30, def: 30, attPercent: 0.1),
-        createTeam(name: '노팅엄', att: 30, mid: 30, def: 30),
-        createTeam(name: '에버턴', att: 30, mid: 30, def: 30),
-        createTeam(name: '루턴', att: 30, mid: 20, def: 20),
+        createTeam(name: '풀럼', att: 35, mid: 35, def: 35, attPercent: 0.8),
+        createTeam(name: '브랜트포드', att: 30, mid: 30, def: 30, attPercent: 0.2),
+        createTeam(name: '노팅엄', att: 30, mid: 30, def: 30, attPercent: 0.2),
+        createTeam(name: '에버턴', att: 30, mid: 30, def: 30, attPercent: 0.2),
+        createTeam(name: '루턴', att: 30, mid: 20, def: 20, attPercent: 0.2),
         createTeam(name: '번리', att: 20, mid: 20, def: 40, attPercent: 0.2),
-        createTeam(name: '본머스', att: 20, mid: 20, def: 20),
-        createTeam(name: '쉐필드', att: 20, mid: 20, def: 20),
+        createTeam(name: '본머스', att: 20, mid: 20, def: 20, attPercent: 0.2),
+        createTeam(name: '쉐필드', att: 20, mid: 20, def: 20, attPercent: 0.2),
       ];
     } else {
       int index = 0;
+      List<Team> ratedByFundamental = ([..._teams]..sort(
+          (a, b) => a.fundamental > b.fundamental ? 0 : 1,
+        ));
+
       _teams = _teams.map((team) {
-        int fundamental = team.fundamental > 80 ? team.fundamental - 5 : team.fundamental;
+        double fundamental = team.fundamental;
 
         if (index == 0) {
-          fundamental = fundamental + 5;
-        } else if (index == 1) {
-          fundamental = fundamental + 3;
-        } else if (index < 4) {
-          fundamental = fundamental + 2;
-        } else if (index < 6) {
           fundamental = fundamental + 1;
+        } else if (index == 1) {
+          fundamental = fundamental + 0.5;
+        } else if (index < 4) {
+          fundamental = fundamental + 0.25;
+        } else if (index < 6) {
+          fundamental = fundamental + 0.125;
         }
 
-        int rowRankBonus = (++index * 0.58).floor();
-        int fundermantalBonus = (team.fundamental / 5.2).floor();
+        double ranAtt = Random().nextDouble();
+        double ranMid = Random().nextDouble();
+        double ranDef = Random().nextDouble();
 
-        int att = team.att + Random().nextInt(5 + fundermantalBonus) - (8 + Random().nextInt(max(fundermantalBonus - 13, 1))) + rowRankBonus;
-        int mid = team.mid + Random().nextInt(5 + fundermantalBonus) - (8 + Random().nextInt(max(fundermantalBonus - 13, 1))) + rowRankBonus;
-        int def = team.def + Random().nextInt(5 + fundermantalBonus) - (8 + Random().nextInt(max(fundermantalBonus - 13, 1))) + rowRankBonus;
+        getValue({required double randomNum, required double fundamental, required int rankBefore}) {
+          int idx = ratedByFundamental.indexWhere((fTeam) => team.name == fTeam.name);
+          double fundamentalBonus = switch (idx) {
+            0 => 0.2,
+            1 => 0.17,
+            2 => 0.13,
+            3 => 0.09,
+            < 6 => 0.02,
+            < 10 => -0.02,
+            _ => -0.04,
+          };
+          double rankBonus = switch (rankBefore) {
+            0 => -0.2,
+            1 => -0.15,
+            < 4 => -0.1,
+            < 6 => -0.05,
+            < 10 => 0,
+            < 17 => 0.05,
+            _ => 0.1,
+          };
 
-        return Team(
+          print('rank:$rankBefore');
+
+          print(randomNum + fundamentalBonus + rankBonus);
+
+          return switch (randomNum + fundamentalBonus + rankBonus) {
+            < 0.1 => -5,
+            < 0.2 => -4,
+            < 0.3 => -3,
+            < 0.4 => -2,
+            < 0.5 => -1,
+            < 0.6 => 0,
+            < 0.7 => 1,
+            < 0.8 => 2,
+            < 0.9 => 3,
+            < 0.95 => 4,
+            _ => 5,
+          };
+        }
+
+        Team newTeam = Team(
           name: team.name,
-          att: min(max(att, 0), 200),
-          mid: min(max(mid, 0), 200),
-          def: min(max(def, 0), 200),
-          fundamental: min(fundamental, 100),
+          att: max(team.att + getValue(randomNum: ranAtt, fundamental: fundamental, rankBefore: index), 5),
+          mid: max(team.mid + getValue(randomNum: ranMid, fundamental: fundamental, rankBefore: index), 5),
+          def: max(team.def + getValue(randomNum: ranDef, fundamental: fundamental, rankBefore: index), 5),
+          fundamental: fundamental,
+          attPercent: team.attPercent,
+          playStyle: team.playStyle,
         );
+
+        index++;
+
+        return newTeam;
       }).toList();
     }
   }
@@ -287,7 +333,6 @@ class _MyHomePageState extends State<MyHomePage> {
       _finishedRound = false;
       _round = 0;
       _matchs = roundRobin(teams: _teams);
-      _matchs.shuffle();
       setState(() {});
       _finishedLeague = false;
 
@@ -300,27 +345,27 @@ class _MyHomePageState extends State<MyHomePage> {
   void nextRound() {
     if (_finishedRound) {
       setState(() {
-        if (_matchs.length - 1 > _round) {
-          _finishedRound = false;
-          _round++;
+        if (_finishedLeague) {
+          _record.add(_teams);
+          creatRound();
+        } else {
+          if (_matchs.length - 1 > _round) {
+            _finishedRound = false;
+            _round++;
+          }
+
+          if (_matchs.length - 1 == _round) _finishedLeague = true;
+
+          if (_autoPlay) {
+            playGame();
+          }
         }
-
-        if (_matchs.length - 1 == _round) _finishedLeague = true;
       });
-
-      if (_round == 37) {
-        _record.add(_teams);
-        creatRound();
-      }
-
-      if (_autoPlay) {
-        playGame();
-      }
     }
   }
 
   List<List<Game>> roundRobin({required List teams}) {
-    List<List<Game>> res = [];
+    List<List<Game>> rounds = [];
 
     int n = teams.length;
     if (n % 2 != 0) {
@@ -329,21 +374,30 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     for (int round = 0; round < (n - 1) * 2; round++) {
-      List<Game> rounds = [];
+      List<Game> games = [];
+
+      bool firshHalfRound = round < (n - 1);
 
       for (int i = 0; i < n / 2; i++) {
-        rounds.add(Game(team1: teams[i], team2: teams[n - 1 - i]));
+        if (firshHalfRound) {
+          games.add(Game(team1: teams[i], team2: teams[n - 1 - i]));
+        } else {
+          games.add(Game(team1: teams[n - 1 - i], team2: teams[i]));
+        }
       }
 
-      rounds.shuffle();
-
-      res.add(rounds);
-      rounds = [];
+      rounds.add(games);
+      games = [];
 
       teams.insert(1, teams.removeLast());
     }
+    List<List<Game>> firstHalfRounds = rounds.sublist(0, (rounds.length / 2).round());
+    List<List<Game>> secondHalfRounds = rounds.sublist((rounds.length / 2).round());
 
-    return res;
+    firstHalfRounds.shuffle();
+    secondHalfRounds.shuffle();
+
+    return [...firstHalfRounds, ...secondHalfRounds];
   }
 
   playGame() async {
@@ -370,69 +424,77 @@ class _MyHomePageState extends State<MyHomePage> {
     int team1Score = 0;
     int team2Score = 0;
 
-    double getAttPoewr({required int att, required int mid}) => (att + mid / 2) * 0.2;
-    double getDefPower({required int def, required int mid}) => (def * 1.5 + mid / 1.5);
+    double getAttPoewr({required int att, required int mid}) => (att * 0.17 + mid * 0.3);
+    double getDefPower({required int def, required int mid}) => (def * 1.45 + mid * 0.35);
 
     double team1Att = getAttPoewr(att: team1.att, mid: team1.mid);
     double team1Def = getDefPower(def: team1.def, mid: team1.mid);
     double team2Att = getAttPoewr(att: team2.att, mid: team2.mid);
     double team2Def = getDefPower(def: team2.def, mid: team2.mid);
 
-    List.generate(team1.winStack, (index) {
-      if (Random().nextDouble() > 0.5) {
-        team1Att = team1Att * 1.05;
-        team2Def = team2Def * 0.98;
-      }
+    // List.generate(team1.winStack, (index) {
+    //   if (Random().nextDouble() > 0.5) {
+    //     team1Att = team1Att * 1.05;
+    //     team2Def = team2Def * 0.98;
+    //   }
 
-      if (Random().nextDouble() > 0.9) {
-        team1Def = team1Def * 0.5;
-      }
-    });
+    //   if (Random().nextDouble() > 0.9) {
+    //     team1Def = team1Def * 0.5;
+    //   }
+    // });
 
-    List.generate(team2.winStack, (index) {
-      if (Random().nextDouble() > 0.5) {
-        team2Att = team2Att * 1.05;
-        team1Def = team1Def * 0.98;
-      }
+    // List.generate(team2.winStack, (index) {
+    //   if (Random().nextDouble() > 0.5) {
+    //     team2Att = team2Att * 1.05;
+    //     team1Def = team1Def * 0.98;
+    //   }
 
-      if (Random().nextDouble() > 0.9) {
-        team2Def = team2Def * 0.5;
-      }
-    });
+    //   if (Random().nextDouble() > 0.9) {
+    //     team2Def = team2Def * 0.5;
+    //   }
+    // });
 
-    List.generate(team1.loseStack, (index) {
-      if (Random().nextDouble() > 0.7) {
-        team1Def = team1Def * 1.1;
-      }
+    // List.generate(team1.loseStack, (index) {
+    //   if (Random().nextDouble() > 0.7) {
+    //     team1Def = team1Def * 1.1;
+    //   }
 
-      if (Random().nextDouble() > 0.95) {
-        team1Att = team1Att * 1.5;
-      }
-    });
-    List.generate(team2.loseStack, (index) {
-      if (Random().nextDouble() > 0.7) {
-        team2Def = team2Def * 1.1;
-      }
+    //   if (Random().nextDouble() > 0.95) {
+    //     team1Att = team1Att * 1.5;
+    //   }
+    // });
+    // List.generate(team2.loseStack, (index) {
+    //   if (Random().nextDouble() > 0.7) {
+    //     team2Def = team2Def * 1.1;
+    //   }
 
-      if (Random().nextDouble() > 0.95) {
-        team2Att = team2Att * 1.5;
-      }
-    });
+    //   if (Random().nextDouble() > 0.95) {
+    //     team2Att = team2Att * 1.5;
+    //   }
+    // });
 
-    team1Att = team1Att * (0.2 + team1.attPercent);
-    team1Def = team1Def * (1.1 - team1.attPercent);
-
-    team2Att = team2Att * (0.2 + team2.attPercent);
-    team2Def = team2Def * (1.1 - team2.attPercent);
+    //10분이 지날수록 공격 시도 횟수 보정;
+    double timerBonus = 0.1;
 
     List.generate(10, (index) {
+      bool team1Goal = false;
+      bool team2Goal = false;
+
       ranNum = Random().nextDouble();
-      bool team1Goal = team1Att / (team1Att + team2Def + team1Score * 40) > ranNum;
+      if (ranNum < team1.attPercent - (1 - team2.attPercent) + timerBonus) {
+        ranNum = Random().nextDouble();
+        team1Goal = team1Att / (team2Def) > ranNum + team1Score / 10;
+      }
+
       ranNum = Random().nextDouble();
-      bool team2Goal = team2Att / (team2Att + team1Def + team2Score * 40) > ranNum;
+      if (ranNum < team2.attPercent - (1 - team1.attPercent) + timerBonus) {
+        ranNum = Random().nextDouble();
+        team2Goal = team2Att / team1Def > ranNum + team2Score / 10;
+      }
 
       if (team1Goal) team1Score++;
       if (team2Goal) team2Score++;
+      timerBonus += 0.1;
     });
 
     if (team1Score > team2Score) {

@@ -17,15 +17,11 @@ class RecordDetailPage extends StatelessWidget {
                       SizedBox(
                         width: 8,
                       ),
-                      Text('A:${team.att}'),
+                      Text('승점:${team.pts}'),
                       SizedBox(
                         width: 8,
                       ),
-                      Text('M:${team.mid}'),
-                      SizedBox(
-                        width: 8,
-                      ),
-                      Text('D:${team.def}'),
+                      Text('power:${team.att + team.mid + team.def}'),
                       SizedBox(
                         width: 8,
                       ),
