@@ -112,7 +112,6 @@ class TeamCard extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeIn,
-      width: 168,
       height: showDetail ? 48 : 27,
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       decoration: BoxDecoration(

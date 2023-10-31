@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:leage_simulator/components/team_card.dart';
+import 'package:leage_simulator/entities/league/fixture.dart';
 import 'package:leage_simulator/entities/team/team.dart';
-import 'package:leage_simulator/main.dart';
 
 class GameCard extends StatelessWidget {
   const GameCard({
@@ -32,11 +32,13 @@ class GameCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        TeamCard(
-          team: fixture.team1,
-          result: team1Result,
-          showDetail: showDetail,
-          rank: teams.indexWhere((element) => element.name == fixture.team1.name) + 1,
+        Expanded(
+          child: TeamCard(
+            team: fixture.team1,
+            result: team1Result,
+            showDetail: showDetail,
+            rank: teams.indexWhere((element) => element.name == fixture.team1.name) + 1,
+          ),
         ),
         SizedBox(
           width: 60,
@@ -50,7 +52,6 @@ class GameCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: (fixture.team1Score > fixture.team2Score) ? 16 : 13,
                   fontWeight: (fixture.team1Score > fixture.team2Score) ? FontWeight.bold : FontWeight.normal,
-                  // color: (game.team1Score > game.team2Score) ? Colors.red : null,
                 ),
               ),
               const SizedBox(width: 2),
@@ -65,18 +66,19 @@ class GameCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: (fixture.team2Score > fixture.team1Score) ? 16 : 13,
                   fontWeight: (fixture.team2Score > fixture.team1Score) ? FontWeight.bold : FontWeight.normal,
-                  // color: (game.team2Score > game.team1Score) ? Colors.red : null,
                 ),
               ),
               const SizedBox(width: 4),
             ],
           ),
         ),
-        TeamCard(
-          team: fixture.team2,
-          result: team2Result,
-          showDetail: showDetail,
-          rank: teams.indexWhere((element) => element.name == fixture.team2.name) + 1,
+        Expanded(
+          child: TeamCard(
+            team: fixture.team2,
+            result: team2Result,
+            showDetail: showDetail,
+            rank: teams.indexWhere((element) => element.name == fixture.team2.name) + 1,
+          ),
         ),
       ],
     );
