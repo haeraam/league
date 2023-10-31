@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:leage_simulator/components/game_card.dart';
 import 'package:leage_simulator/components/league_table.dart';
+import 'package:leage_simulator/entities/team/team.dart';
 import 'package:leage_simulator/page/record_detail.dart';
+import 'package:leage_simulator/static/teams/teams.dart';
 
 void main() {
   runApp(const MyApp());
@@ -39,92 +41,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-enum PlayStyle {
-  pass,
-  press,
-  counter,
-  none,
-}
-
-class Team {
-  Team({
-    required this.name,
-    this.pts = 0,
-    this.won = 0,
-    this.drawn = 0,
-    this.lost = 0,
-    this.gf = 0,
-    this.ga = 0,
-    this.gd = 0,
-    this.winStack = 0,
-    this.noLoseStack = 0,
-    this.loseStack = 0,
-    this.noWinStack = 0,
-    required this.att,
-    required this.mid,
-    required this.def,
-    this.playStyle = PlayStyle.none,
-    this.attPercent = 0.5,
-    this.fundamental = 0.0,
-  });
-  final String name;
-  double fundamental;
-  int pts;
-  int won;
-  int drawn;
-  int lost;
-
-  int winStack;
-  int noLoseStack;
-  int loseStack;
-  int noWinStack;
-
-  int gf;
-  int ga;
-  int gd;
-
-  int att;
-  int mid;
-  int def;
-  double attPercent;
-  PlayStyle playStyle;
-
-  calcPts() {
-    pts = won * 3 + drawn;
-  }
-
-  win() {
-    won++;
-    winStack++;
-    noLoseStack++;
-    noWinStack = 0;
-    loseStack = 0;
-    calcPts();
-  }
-
-  draw() {
-    drawn++;
-    noLoseStack++;
-    noWinStack++;
-    winStack = 0;
-    loseStack = 0;
-    calcPts();
-  }
-
-  lose() {
-    lost++;
-    loseStack++;
-    noWinStack++;
-    noLoseStack = 0;
-    winStack = 0;
-  }
-
-  @override
-  String toString() {
-    return '$name , $won , $drawn , $lost';
-  }
-}
-
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
@@ -132,12 +48,12 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class Game {
+class Fixture {
   final Team team1;
   final Team team2;
   int team1Score;
   int team2Score;
-  Game({
+  Fixture({
     required this.team1,
     required this.team2,
     this.team1Score = 0,
@@ -149,9 +65,13 @@ class Game {
   }
 }
 
+class League{
+
+}
+
 class _MyHomePageState extends State<MyHomePage> {
   int _round = 0;
-  List<List<Game>> _matchs = [];
+  List<List<Fixture>> _matchs = [];
   bool _finishedRound = false;
   bool _autoPlay = false;
   bool _autoPlayFast = false;
@@ -160,27 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _showDetail = true;
   Duration _autoPlaySpeed = const Duration(milliseconds: 300);
 
-  Team createTeam({
-    required String name,
-    required int att,
-    required int mid,
-    required int def,
-    fundamental = 1.0,
-    double attPercent = 0.5,
-  }) {
-    if (fundamental is int) fundamental = fundamental.toDouble();
-    return Team(
-      name: name,
-      att: att,
-      def: def,
-      mid: mid,
-      attPercent: attPercent,
-      fundamental: fundamental,
-    );
-  }
-
   List<Team> _teams = [];
-
   List<List<Team>> _record = [];
 
   allReset() {
@@ -200,53 +100,12 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
-  final List<String> _teamData = [
-    '토트넘',
-    '맨시티',
-    '아스날',
-    '리버풀',
-    '아스톤빌라',
-    '뉴캐슬',
-    '브라이튼',
-    '맨유',
-    '웨스트햄',
-    '첼시',
-    '크팰',
-    '울버햄튼',
-    '풀럼',
-    '브랜트포드',
-    '노팅엄',
-    '에버턴',
-    '루턴',
-    '번리',
-    '본머스',
-    '쉐필드',
-  ];
-
   void teamSetting() {
     if (_teams.isEmpty) {
-      _teams = [
-        createTeam(name: '토트넘', att: 80, mid: 50, def: 60),
-        createTeam(name: '맨시티', att: 90, mid: 90, def: 90),
-        createTeam(name: '아스날', att: 90, mid: 80, def: 100, fundamental: 10),
-        createTeam(name: '리버풀', att: 100, mid: 70, def: 80, fundamental: 10),
-        createTeam(name: '아스톤빌라', att: 50, mid: 50, def: 50),
-        createTeam(name: '뉴캐슬', att: 50, mid: 50, def: 50),
-        createTeam(name: '브라이튼', att: 50, mid: 50, def: 50),
-        createTeam(name: '맨유', att: 40, mid: 40, def: 40, fundamental: 10),
-        createTeam(name: '웨스트햄', att: 40, mid: 40, def: 40),
-        createTeam(name: '첼시', att: 40, mid: 40, def: 40, fundamental: 10),
-        createTeam(name: '크팰', att: 35, mid: 35, def: 35),
-        createTeam(name: '울버햄튼', att: 35, mid: 35, def: 35),
-        createTeam(name: '풀럼', att: 35, mid: 35, def: 35, attPercent: 0.8),
-        createTeam(name: '브랜트포드', att: 30, mid: 30, def: 30, attPercent: 0.2),
-        createTeam(name: '노팅엄', att: 30, mid: 30, def: 30, attPercent: 0.2),
-        createTeam(name: '에버턴', att: 30, mid: 30, def: 30, attPercent: 0.2),
-        createTeam(name: '루턴', att: 30, mid: 20, def: 20, attPercent: 0.2),
-        createTeam(name: '번리', att: 20, mid: 20, def: 40, attPercent: 0.2),
-        createTeam(name: '본머스', att: 20, mid: 20, def: 20, attPercent: 0.2),
-        createTeam(name: '쉐필드', att: 20, mid: 20, def: 20, attPercent: 0.2),
-      ];
+      _teams = premierLeagueTeams;
+      for (var team in _teams) {
+        team.clear();
+      }
     } else {
       int index = 0;
       List<Team> ratedByFundamental = ([..._teams]..sort(
@@ -291,10 +150,6 @@ class _MyHomePageState extends State<MyHomePage> {
             _ => 0.1,
           };
 
-          print('rank:$rankBefore');
-
-          print(randomNum + fundamentalBonus + rankBonus);
-
           return switch (randomNum + fundamentalBonus + rankBonus) {
             < 0.1 => -5,
             < 0.2 => -4,
@@ -328,17 +183,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void creatRound() {
-    if (_finishedLeague) {
-      teamSetting();
-      _finishedRound = false;
-      _round = 0;
-      _matchs = roundRobin(teams: _teams);
-      setState(() {});
-      _finishedLeague = false;
+    teamSetting();
+    _finishedRound = false;
+    _round = 0;
+    _matchs = roundRobin(teams: _teams);
+    setState(() {});
+    _finishedLeague = false;
 
-      if (_autoPlay) {
-        playGame();
-      }
+    if (_autoPlay) {
+      playGame();
     }
   }
 
@@ -364,8 +217,8 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  List<List<Game>> roundRobin({required List teams}) {
-    List<List<Game>> rounds = [];
+  List<List<Fixture>> roundRobin({required List teams}) {
+    List<List<Fixture>> rounds = [];
 
     int n = teams.length;
     if (n % 2 != 0) {
@@ -374,15 +227,15 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     for (int round = 0; round < (n - 1) * 2; round++) {
-      List<Game> games = [];
+      List<Fixture> games = [];
 
       bool firshHalfRound = round < (n - 1);
 
       for (int i = 0; i < n / 2; i++) {
         if (firshHalfRound) {
-          games.add(Game(team1: teams[i], team2: teams[n - 1 - i]));
+          games.add(Fixture(team1: teams[i], team2: teams[n - 1 - i]));
         } else {
-          games.add(Game(team1: teams[n - 1 - i], team2: teams[i]));
+          games.add(Fixture(team1: teams[n - 1 - i], team2: teams[i]));
         }
       }
 
@@ -391,8 +244,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
       teams.insert(1, teams.removeLast());
     }
-    List<List<Game>> firstHalfRounds = rounds.sublist(0, (rounds.length / 2).round());
-    List<List<Game>> secondHalfRounds = rounds.sublist((rounds.length / 2).round());
+    List<List<Fixture>> firstHalfRounds = rounds.sublist(0, (rounds.length / 2).round());
+    List<List<Fixture>> secondHalfRounds = rounds.sublist((rounds.length / 2).round());
 
     firstHalfRounds.shuffle();
     secondHalfRounds.shuffle();
@@ -402,7 +255,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   playGame() async {
     if (!_finishedRound) {
-      List<Game> matchs = _matchs[_round];
+      List<Fixture> matchs = _matchs[_round];
 
       _matchs[_round] = matchs.map((match) => game(match: match)).toList();
 
@@ -417,7 +270,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Game game({required Game match}) {
+  Fixture game({required Fixture match}) {
     Team team1 = match.team1;
     Team team2 = match.team2;
     double ranNum = Random().nextDouble();
@@ -431,47 +284,6 @@ class _MyHomePageState extends State<MyHomePage> {
     double team1Def = getDefPower(def: team1.def, mid: team1.mid);
     double team2Att = getAttPoewr(att: team2.att, mid: team2.mid);
     double team2Def = getDefPower(def: team2.def, mid: team2.mid);
-
-    // List.generate(team1.winStack, (index) {
-    //   if (Random().nextDouble() > 0.5) {
-    //     team1Att = team1Att * 1.05;
-    //     team2Def = team2Def * 0.98;
-    //   }
-
-    //   if (Random().nextDouble() > 0.9) {
-    //     team1Def = team1Def * 0.5;
-    //   }
-    // });
-
-    // List.generate(team2.winStack, (index) {
-    //   if (Random().nextDouble() > 0.5) {
-    //     team2Att = team2Att * 1.05;
-    //     team1Def = team1Def * 0.98;
-    //   }
-
-    //   if (Random().nextDouble() > 0.9) {
-    //     team2Def = team2Def * 0.5;
-    //   }
-    // });
-
-    // List.generate(team1.loseStack, (index) {
-    //   if (Random().nextDouble() > 0.7) {
-    //     team1Def = team1Def * 1.1;
-    //   }
-
-    //   if (Random().nextDouble() > 0.95) {
-    //     team1Att = team1Att * 1.5;
-    //   }
-    // });
-    // List.generate(team2.loseStack, (index) {
-    //   if (Random().nextDouble() > 0.7) {
-    //     team2Def = team2Def * 1.1;
-    //   }
-
-    //   if (Random().nextDouble() > 0.95) {
-    //     team2Att = team2Att * 1.5;
-    //   }
-    // });
 
     //10분이 지날수록 공격 시도 횟수 보정;
     double timerBonus = 0.1;
@@ -530,11 +342,11 @@ class _MyHomePageState extends State<MyHomePage> {
     return match;
   }
 
-  Iterable<Game> getMainGames({required List<Game> games}) {
+  Iterable<Fixture> getMainGames({required List<Fixture> games}) {
     if (!_showMainGame) return games;
     findIndex({required Team target}) => _teams.indexWhere((team) => team.name == target.name);
 
-    List<Game> mainGames = [...games.where((game) => findIndex(target: game.team1) < 5 || findIndex(target: game.team2) < 5)];
+    List<Fixture> mainGames = [...games.where((game) => findIndex(target: game.team1) < 5 || findIndex(target: game.team2) < 5)];
 
     mainGames.sort((a, b) {
       return max(a.team1.pts, a.team2.pts) > max(b.team1.pts, b.team2.pts) ? 0 : 1;
@@ -632,7 +444,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               (match) => Padding(
                                 padding: const EdgeInsets.only(top: 12),
                                 child: GameCard(
-                                  game: match,
+                                  fixture: match,
                                   isPlayed: _finishedRound,
                                   showDetail: _showDetail,
                                   teams: _teams,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:leage_simulator/main.dart';
+import 'package:leage_simulator/entities/team/team.dart';
 
 class RecordDetailPage extends StatelessWidget {
   const RecordDetailPage({super.key, required this.teams});

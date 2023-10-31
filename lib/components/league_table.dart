@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:leage_simulator/main.dart';
+import 'package:leage_simulator/entities/team/team.dart';
 
 class LeageTable extends StatelessWidget {
   const LeageTable({super.key, required this.teams});
@@ -15,7 +15,10 @@ class LeageTable extends StatelessWidget {
               .map((team) => Row(children: [
                     SizedBox(
                       width: 70,
-                      child: Text(teams[index].name),
+                      child: Text(
+                        teams[index].name,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                     SizedBox(
                       width: 60,

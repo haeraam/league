@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:leage_simulator/main.dart';
+import 'package:leage_simulator/entities/team/team.dart';
 
 const TextStyle teamCardTitleStyle = TextStyle(fontSize: 13, fontWeight: FontWeight.bold);
 
@@ -134,24 +134,24 @@ class TeamCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(width: 4),
-              Row(
-                children: [
-                  Text(
-                    '${team.att}',
-                    style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 2),
-                  Text(
-                    '/${team.mid}',
-                    style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 2),
-                  Text(
-                    '/${team.def}',
-                    style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              )
+              // Row(
+              //   children: [
+              //     Text(
+              //       '${team.att}',
+              //       style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold),
+              //     ),
+              //     const SizedBox(width: 2),
+              //     Text(
+              //       '/${team.mid}',
+              //       style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold),
+              //     ),
+              //     const SizedBox(width: 2),
+              //     Text(
+              //       '/${team.def}',
+              //       style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold),
+              //     ),
+              //   ],
+              // )
             ],
           ),
           if (showDetail) const SizedBox(height: 4),
