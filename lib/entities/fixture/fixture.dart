@@ -14,55 +14,77 @@ class Fixture {
   int awayClubScore = 0;
   bool played = false;
   bool isHomeOwnBall = true;
-
-  bool attact({required Club attckClub, required Club deffencClub, required int time}) {
-    double timerBonus = 0.1 + (time ~/ 10);
-    double ranNum = Random().nextDouble();
-
-    bool shoot = ranNum < attckClub.attPercent - (1 - deffencClub.attPercent) + timerBonus;
-    ranNum = Random().nextDouble();
-    bool goal = attckClub.attPower / deffencClub.defPower > ranNum;
-
-    return switch (shoot) {
-      true => goal,
-      false => false,
-    };
-  }
+  int playTime = 0;
+  int homeBallPercent = 0;
+  int awayBallPercent = 0;
 
   still() {
     isHomeOwnBall = !isHomeOwnBall;
   }
 
-  longPass({required GroundArea from, required GroundArea to}) {
-    if (Random().nextDouble() > 0.2) {
+  double getBonus(Vertical v) {
+    double bonus;
+    if (isHomeOwnBall) {
+      bonus = switch (v) {
+        Vertical.away => homeClub.att / awayClub.def,
+        Vertical.center => homeClub.mid / awayClub.mid,
+        Vertical.home => homeClub.def / awayClub.att,
+      };
+    } else {
+      bonus = switch (v) {
+        Vertical.away => awayClub.def / homeClub.att,
+        Vertical.center => awayClub.mid / homeClub.mid,
+        Vertical.home => awayClub.att / homeClub.def,
+      };
+    }
+
+    return sqrt(bonus * 2) / 2;
+  }
+
+  GroundArea longPass({required GroundArea from, required GroundArea to}) {
+    double fromBonus = getBonus(from.v) * 0.15;
+    double toBonus = getBonus(to.v) * 0.1;
+    if (Random().nextDouble() > (-0.1 + fromBonus + toBonus)) {
       still();
     }
     return to;
   }
 
-  throughPass({required GroundArea from, required GroundArea to}) {
-    if (Random().nextDouble() > 0.5) {
+  GroundArea throughPass({required GroundArea from, required GroundArea to}) {
+    double fromBonus = getBonus(from.v) * 0.25;
+    double toBonus = getBonus(to.v) * 0.15;
+    if (Random().nextDouble() > 0.2 + fromBonus + toBonus) {
       still();
     }
     return to;
   }
 
-  cross({required GroundArea from, required GroundArea to}) {
-    if (Random().nextDouble() > 0.3) {
+  GroundArea cross({required GroundArea from, required GroundArea to}) {
+    double fromBonus = getBonus(from.v) * 0.05;
+    double toBonus = getBonus(to.v) * 0.1;
+    if (Random().nextDouble() > 0.2 + fromBonus + toBonus) {
       still();
     }
     return to;
   }
 
-  shoot({required GroundArea from}) {
-    print('shooTTTTTTTTTTTTTT');
-    isHomeOwnBall ? homeClubScore++ : awayClubScore++;
-    isHomeOwnBall = !isHomeOwnBall;
-    return GroundArea();
+  GroundArea shoot({required GroundArea from}) {
+    print('/////////// shoot/////////// ');
+    double fromBonus = sqrt(getBonus(from.v) * 20) / 20;
+    print(fromBonus);
+    if (Random().nextDouble() < 0.05 + fromBonus) {
+      isHomeOwnBall ? homeClubScore++ : awayClubScore++;
+      isHomeOwnBall = !isHomeOwnBall;
+      return GroundArea();
+    } else {
+      return from;
+    }
   }
 
-  buildUpPass({required GroundArea from, required GroundArea to}) {
-    if (Random().nextDouble() > 0.9) {
+  GroundArea buildUpPass({required GroundArea from, required GroundArea to}) {
+    double fromBonus = getBonus(from.v) * 0.4;
+    double toBonus = getBonus(to.v) * 0.3;
+    if (Random().nextDouble() > 0.4 + fromBonus + toBonus) {
       still();
     }
     return to;
@@ -184,7 +206,7 @@ class Fixture {
     if (played) return;
     GroundArea ballLocation = GroundArea();
     double time = 0;
-    while (time <= 90) {
+    while (time < 100) {
       switch (ballLocation.v) {
         case Vertical.home:
           switch (ballLocation.h) {
@@ -226,9 +248,8 @@ class Fixture {
           }
           break;
       }
-      print('time: $time owner:${isHomeOwnBall ? 'home' : 'away'} $ballLocation');
       time += 0.5;
-      // await Future.delayed(const Duration(milliseconds: 10));
+      isHomeOwnBall ? homeBallPercent++ : awayBallPercent++;
     }
 
     homeClub.saveResult(scored: homeClubScore, conceded: awayClubScore);

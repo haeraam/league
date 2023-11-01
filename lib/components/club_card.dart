@@ -18,11 +18,13 @@ class ClubCard extends StatelessWidget {
     this.showDetail = false,
     this.result = Result.none,
     this.rank,
+    required this.percent,
   });
   final Club club;
   final bool showDetail;
   final Result result;
   final int? rank;
+  final double percent;
 
   Text getTitleText({required String name, required Color color}) {
     return Text(
@@ -130,6 +132,7 @@ class ClubCard extends StatelessWidget {
                     width: 2,
                   ),
                   getTitleText(name: club.name, color: textColor),
+                  if (result != Result.none) Text(percent.toStringAsFixed(1))
                 ],
               ),
               const SizedBox(width: 4),

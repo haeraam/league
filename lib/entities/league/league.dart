@@ -22,6 +22,7 @@ class League {
     season = [];
     finishedRound = false;
     finishedLeague = true;
+    startNewSeason();
   }
 
   void startNewSeason() {

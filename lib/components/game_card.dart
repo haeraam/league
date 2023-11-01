@@ -33,6 +33,7 @@ class _GameCardState extends State<GameCard> {
 
   @override
   Widget build(BuildContext context) {
+    double homePercent = widget.fixture.homeBallPercent * 100 / (widget.fixture.awayBallPercent + widget.fixture.homeBallPercent);
     var (homeClubResult, awayClubResult) = getResult(fixture: widget.fixture);
     return Container(
       // color: Colors.red,
@@ -45,6 +46,7 @@ class _GameCardState extends State<GameCard> {
               result: homeClubResult,
               showDetail: widget.showDetail,
               rank: widget.clubs.indexWhere((element) => element.name == widget.fixture.homeClub.name) + 1,
+              percent: homePercent,
             ),
           ),
           const SizedBox(width: 4),
@@ -95,6 +97,7 @@ class _GameCardState extends State<GameCard> {
               result: awayClubResult,
               showDetail: widget.showDetail,
               rank: widget.clubs.indexWhere((element) => element.name == widget.fixture.awayClub.name) + 1,
+              percent: 100 - homePercent,
             ),
           ),
         ],
