@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:leage_simulator/components/game_card.dart';
 import 'package:leage_simulator/components/league_table.dart';
-import 'package:leage_simulator/entities/league/fixture.dart';
+import 'package:leage_simulator/entities/fixture/fixture.dart';
 import 'package:leage_simulator/entities/league/league.dart';
-import 'package:leage_simulator/entities/team/team.dart';
-import 'package:leage_simulator/static/teams/teams.dart';
+import 'package:leage_simulator/entities/club/club.dart';
+import 'package:leage_simulator/static/clubs/clubs.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,7 +23,7 @@ class _HomePageState extends State<HomePage> {
   bool _showDetail = true;
   Duration _autoPlaySpeed = const Duration(milliseconds: 300);
 
-  League pl = League(teams: premierLeagueTeams);
+  League pl = League(clubs: premierLeagueClubs);
 
   allReset() {
     pl.allReset();
@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
     pl.startNewSeason();
     setState(() {});
     if (_autoPlay) {
-      pl.playGame();
+      pl.playAllFixture();
     }
   }
 
@@ -43,13 +43,14 @@ class _HomePageState extends State<HomePage> {
       pl.nextRound();
     });
     if (_autoPlay) {
-      pl.playGame();
+      pl.playAllFixture();
+      playGame();
     }
   }
 
   playGame() async {
     setState(() {
-      pl.playGame();
+      pl.playAllFixture();
     });
 
     if (_autoPlay) {
@@ -60,12 +61,12 @@ class _HomePageState extends State<HomePage> {
 
   Iterable<Fixture> getMainGames({required List<Fixture> games}) {
     if (!_showMainGame) return games;
-    findIndex({required Team target}) => pl.teams.indexWhere((team) => team.name == target.name);
+    findIndex({required Club target}) => pl.clubs.indexWhere((club) => club.name == target.name);
 
-    List<Fixture> mainGames = [...games.where((game) => findIndex(target: game.team1) < 5 || findIndex(target: game.team2) < 5)];
+    List<Fixture> mainGames = [...games.where((game) => findIndex(target: game.homeClub) < 5 || findIndex(target: game.awayClub) < 5)];
 
     mainGames.sort((a, b) {
-      return max(a.team1.pts, a.team2.pts) > max(b.team1.pts, b.team2.pts) ? 0 : 1;
+      return max(a.homeClub.pts, a.awayClub.pts) > max(b.homeClub.pts, b.awayClub.pts) ? 0 : 1;
     });
 
     return mainGames;
@@ -73,9 +74,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    int ROUND = pl.round;
-    List<List<Fixture>> season = pl.season;
-
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -157,8 +155,8 @@ class _HomePageState extends State<HomePage> {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      if (season.isNotEmpty)
-                        ...getMainGames(games: season[ROUND])
+                      if (pl.season.isNotEmpty)
+                        ...getMainGames(games: pl.season[pl.round])
                             .map(
                               (match) => Padding(
                                 padding: const EdgeInsets.only(top: 12),
@@ -166,7 +164,7 @@ class _HomePageState extends State<HomePage> {
                                   fixture: match,
                                   isPlayed: pl.finishedRound,
                                   showDetail: _showDetail,
-                                  teams: pl.teams,
+                                  clubs: pl.clubs,
                                 ),
                               ),
                             )
@@ -177,7 +175,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            LeageTable(teams: pl.teams),
+            LeageTable(clubs: pl.clubs),
             ...pl.record
                 .map((record) => GestureDetector(
                       onTap: () {

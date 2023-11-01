@@ -1,6 +1,6 @@
-import 'package:leage_simulator/entities/team/team.dart';
+import 'package:leage_simulator/entities/club/club.dart';
 
-Team brightonAndHoveAlbion = Team(
+Club brightonAndHoveAlbion = Club(
   name: 'Brighton',
   fullName: 'Brighton and Hove Albion',
   att: 70,

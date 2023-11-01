@@ -1,6 +1,6 @@
-import 'package:leage_simulator/entities/team/team.dart';
+import 'package:leage_simulator/entities/club/club.dart';
 
-Team crystalPalace = Team(
+Club crystalPalace = Club(
   name: 'CrystalPalace',
   fullName: 'Crystal Palace',
   att: 50,

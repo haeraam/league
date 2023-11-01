@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:leage_simulator/entities/team/team.dart';
+import 'package:leage_simulator/entities/club/club.dart';
 
-const TextStyle teamCardTitleStyle = TextStyle(fontSize: 13, fontWeight: FontWeight.bold);
+const TextStyle clubCardTitleStyle = TextStyle(fontSize: 13, fontWeight: FontWeight.bold);
 
-const TextStyle teamCardWinnerFontColor = TextStyle(
+const TextStyle clubCardWinnerFontColor = TextStyle(
   color: Color.fromARGB(255, 4, 0, 44),
 );
 
-const TextStyle teamCardStacStyle = TextStyle(fontSize: 8, color: Colors.white, fontWeight: FontWeight.bold);
+const TextStyle clubCardStacStyle = TextStyle(fontSize: 8, color: Colors.white, fontWeight: FontWeight.bold);
 
 enum Result { win, draw, lose, none }
 
-class TeamCard extends StatelessWidget {
-  const TeamCard({
+class ClubCard extends StatelessWidget {
+  const ClubCard({
     super.key,
-    required this.team,
+    required this.club,
     this.showDetail = false,
     this.result = Result.none,
     this.rank,
   });
-  final Team team;
+  final Club club;
   final bool showDetail;
   final Result result;
   final int? rank;
@@ -27,7 +27,7 @@ class TeamCard extends StatelessWidget {
   Text getTitleText({required String name, required Color color}) {
     return Text(
       name,
-      style: teamCardTitleStyle.copyWith(color: color),
+      style: clubCardTitleStyle.copyWith(color: color),
     );
   }
 
@@ -38,31 +38,31 @@ class TeamCard extends StatelessWidget {
       decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(4)),
       child: Text(
         text,
-        style: teamCardStacStyle,
+        style: clubCardStacStyle,
       ),
     );
   }
 
-  Widget getStackText({required Team team}) {
+  Widget getStackText({required Club club}) {
     List<Widget> res = [];
-    if (team.winStack > 1) {
+    if (club.winStack > 1) {
       res.add(
-        createStackCard(text: '${team.winStack}연승', bgColor: const Color.fromARGB(255, 68, 209, 125)),
+        createStackCard(text: '${club.winStack}연승', bgColor: const Color.fromARGB(255, 68, 209, 125)),
       );
     }
-    if (team.noLoseStack > 3) {
+    if (club.noLoseStack > 3) {
       res.add(
-        createStackCard(text: '${team.noLoseStack}연속 무패', bgColor: const Color.fromARGB(255, 46, 148, 232)),
+        createStackCard(text: '${club.noLoseStack}연속 무패', bgColor: const Color.fromARGB(255, 46, 148, 232)),
       );
     }
-    if (team.loseStack > 1) {
+    if (club.loseStack > 1) {
       res.add(
-        createStackCard(text: '${team.loseStack}연패', bgColor: const Color.fromARGB(255, 217, 65, 86)),
+        createStackCard(text: '${club.loseStack}연패', bgColor: const Color.fromARGB(255, 217, 65, 86)),
       );
     }
-    if (team.noWinStack > 3) {
+    if (club.noWinStack > 3) {
       res.add(
-        createStackCard(text: '${team.noWinStack}연속 무승', bgColor: const Color.fromARGB(255, 97, 97, 97)),
+        createStackCard(text: '${club.noWinStack}연속 무승', bgColor: const Color.fromARGB(255, 97, 97, 97)),
       );
     }
 
@@ -129,24 +129,24 @@ class TeamCard extends StatelessWidget {
                   const SizedBox(
                     width: 2,
                   ),
-                  getTitleText(name: team.name, color: textColor),
+                  getTitleText(name: club.name, color: textColor),
                 ],
               ),
               const SizedBox(width: 4),
               // Row(
               //   children: [
               //     Text(
-              //       '${team.att}',
+              //       '${club.att}',
               //       style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold),
               //     ),
               //     const SizedBox(width: 2),
               //     Text(
-              //       '/${team.mid}',
+              //       '/${club.mid}',
               //       style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold),
               //     ),
               //     const SizedBox(width: 2),
               //     Text(
-              //       '/${team.def}',
+              //       '/${club.def}',
               //       style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold),
               //     ),
               //   ],
@@ -154,7 +154,7 @@ class TeamCard extends StatelessWidget {
             ],
           ),
           if (showDetail) const SizedBox(height: 4),
-          if (showDetail) getStackText(team: team),
+          if (showDetail) getStackText(club: club),
         ],
       ),
     );

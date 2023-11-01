@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:leage_simulator/entities/team/team.dart';
+import 'package:leage_simulator/entities/club/club.dart';
 import 'package:leage_simulator/page/home_page.dart';
 import 'package:leage_simulator/page/record_detail.dart';
 
@@ -17,7 +17,7 @@ final _router = GoRouter(
     GoRoute(
         path: '/record_detail',
         builder: (context, state) {
-          return RecordDetailPage(teams: state.extra as List<Team>);
+          return RecordDetailPage(clubs: state.extra as List<Club>);
         }),
   ],
 );

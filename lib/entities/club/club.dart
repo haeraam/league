@@ -1,7 +1,7 @@
-import 'package:leage_simulator/entities/team/enum.dart';
+import 'package:leage_simulator/entities/club/enum.dart';
 
-class Team {
-  Team({
+class Club {
+  Club({
     required this.name,
     this.pts = 0,
     this.won = 0,
@@ -65,6 +65,19 @@ class Team {
     pts = won * 3 + drawn;
   }
 
+  play({required int scored, required int conceded}) {
+    gf += scored;
+    ga -= conceded;
+    gd += (scored - conceded);
+    if (scored > conceded) {
+      win();
+    } else if (conceded > scored) {
+      lose();
+    } else {
+      draw();
+    }
+  }
+
   win() {
     won++;
     winStack++;
@@ -89,6 +102,14 @@ class Team {
     noWinStack++;
     noLoseStack = 0;
     winStack = 0;
+  }
+
+  get attPower {
+    return (att * 0.17 + mid * 0.3);
+  }
+
+  get defPower {
+    return (def * 1.45 + mid * 0.35);
   }
 
   @override

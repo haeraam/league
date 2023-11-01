@@ -1,86 +1,104 @@
 import 'package:flutter/material.dart';
-import 'package:leage_simulator/components/team_card.dart';
-import 'package:leage_simulator/entities/league/fixture.dart';
-import 'package:leage_simulator/entities/team/team.dart';
+import 'package:leage_simulator/components/club_card.dart';
+import 'package:leage_simulator/entities/fixture/fixture.dart';
+import 'package:leage_simulator/entities/club/club.dart';
 
-class GameCard extends StatelessWidget {
+class GameCard extends StatefulWidget {
   const GameCard({
     super.key,
     required this.isPlayed,
     required this.showDetail,
     required this.fixture,
-    required this.teams,
+    required this.clubs,
   });
   final bool isPlayed;
   final bool showDetail;
   final Fixture fixture;
-  final List<Team> teams;
+  final List<Club> clubs;
 
+  @override
+  State<GameCard> createState() => _GameCardState();
+}
+
+class _GameCardState extends State<GameCard> {
   (Result, Result) getResult({required Fixture fixture}) {
-    if (fixture.team1Score > fixture.team2Score) {
+    if (fixture.homeClubScore > fixture.awayClubScore) {
       return (Result.win, Result.lose);
-    } else if (fixture.team1Score < fixture.team2Score) {
+    } else if (fixture.homeClubScore < fixture.awayClubScore) {
       return (Result.lose, Result.win);
     } else {
-      return isPlayed ? (Result.draw, Result.draw) : (Result.none, Result.none);
+      return widget.isPlayed ? (Result.draw, Result.draw) : (Result.none, Result.none);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    var (team1Result, team2Result) = getResult(fixture: fixture);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Expanded(
-          child: TeamCard(
-            team: fixture.team1,
-            result: team1Result,
-            showDetail: showDetail,
-            rank: teams.indexWhere((element) => element.name == fixture.team1.name) + 1,
+    var (homeClubResult, awayClubResult) = getResult(fixture: widget.fixture);
+    return Container(
+      // color: Colors.red,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: ClubCard(
+              club: widget.fixture.homeClub,
+              result: homeClubResult,
+              showDetail: widget.showDetail,
+              rank: widget.clubs.indexWhere((element) => element.name == widget.fixture.homeClub.name) + 1,
+            ),
           ),
-        ),
-        SizedBox(
-          width: 60,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(width: 4),
-              // if (isPlayed)
-              Text(
-                '${fixture.team1Score}',
-                style: TextStyle(
-                  fontSize: (fixture.team1Score > fixture.team2Score) ? 16 : 13,
-                  fontWeight: (fixture.team1Score > fixture.team2Score) ? FontWeight.bold : FontWeight.normal,
-                ),
+          const SizedBox(width: 4),
+          if (!widget.fixture.played)
+            SizedBox(
+              // width: 50,
+              child: ElevatedButton(
+                  onPressed: () {
+                    widget.fixture.play();
+                    setState(() {});
+                  },
+                  child: Text('play')),
+            ),
+          if (widget.fixture.played)
+            SizedBox(
+              width: 60,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '${widget.fixture.homeClubScore}',
+                    style: TextStyle(
+                      fontSize: (widget.fixture.homeClubScore > widget.fixture.awayClubScore) ? 16 : 13,
+                      fontWeight: (widget.fixture.homeClubScore > widget.fixture.awayClubScore) ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  const Text(
+                    'vs',
+                    style: TextStyle(fontSize: 10),
+                  ),
+                  const SizedBox(width: 2),
+                  // if (isPlayed)
+                  Text(
+                    '${widget.fixture.awayClubScore}',
+                    style: TextStyle(
+                      fontSize: (widget.fixture.awayClubScore > widget.fixture.homeClubScore) ? 16 : 13,
+                      fontWeight: (widget.fixture.awayClubScore > widget.fixture.homeClubScore) ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 2),
-              const Text(
-                'vs',
-                style: TextStyle(fontSize: 10),
-              ),
-              const SizedBox(width: 2),
-              // if (isPlayed)
-              Text(
-                '${fixture.team2Score}',
-                style: TextStyle(
-                  fontSize: (fixture.team2Score > fixture.team1Score) ? 16 : 13,
-                  fontWeight: (fixture.team2Score > fixture.team1Score) ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-              const SizedBox(width: 4),
-            ],
+            ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: ClubCard(
+              club: widget.fixture.awayClub,
+              result: awayClubResult,
+              showDetail: widget.showDetail,
+              rank: widget.clubs.indexWhere((element) => element.name == widget.fixture.awayClub.name) + 1,
+            ),
           ),
-        ),
-        Expanded(
-          child: TeamCard(
-            team: fixture.team2,
-            result: team2Result,
-            showDetail: showDetail,
-            rank: teams.indexWhere((element) => element.name == fixture.team2.name) + 1,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

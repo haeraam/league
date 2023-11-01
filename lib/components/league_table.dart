@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:leage_simulator/entities/team/team.dart';
+import 'package:leage_simulator/entities/club/club.dart';
 
 class LeageTable extends StatelessWidget {
-  const LeageTable({super.key, required this.teams});
-  final List<Team> teams;
+  const LeageTable({super.key, required this.clubs});
+  final List<Club> clubs;
 
   @override
   Widget build(BuildContext context) {
@@ -11,61 +11,61 @@ class LeageTable extends StatelessWidget {
     return Container(
         height: 420,
         child: Column(
-          children: teams
-              .map((team) => Row(children: [
+          children: clubs
+              .map((club) => Row(children: [
                     SizedBox(
                       width: 70,
                       child: Text(
-                        teams[index].name,
+                        clubs[index].name,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     SizedBox(
                       width: 60,
                       child: Text(
-                        'pts: ${teams[index].pts}',
+                        'pts: ${clubs[index].pts}',
                         style: const TextStyle(fontSize: 12),
                       ),
                     ),
                     SizedBox(
                       width: 40,
                       child: Text(
-                        'W: ${teams[index].won}',
+                        'W: ${clubs[index].won}',
                         style: const TextStyle(fontSize: 12),
                       ),
                     ),
                     SizedBox(
                       width: 40,
                       child: Text(
-                        'D: ${teams[index].drawn}',
+                        'D: ${clubs[index].drawn}',
                         style: const TextStyle(fontSize: 12),
                       ),
                     ),
                     SizedBox(
                       width: 40,
                       child: Text(
-                        'L: ${teams[index].lost}',
+                        'L: ${clubs[index].lost}',
                         style: const TextStyle(fontSize: 12),
                       ),
                     ),
                     SizedBox(
                       width: 50,
                       child: Text(
-                        'gf: ${teams[index].gf}',
+                        'gf: ${clubs[index].gf}',
                         style: const TextStyle(fontSize: 12),
                       ),
                     ),
                     SizedBox(
                       width: 50,
                       child: Text(
-                        'ga: ${teams[index].ga}',
+                        'ga: ${clubs[index].ga}',
                         style: const TextStyle(fontSize: 12),
                       ),
                     ),
                     SizedBox(
                       width: 50,
                       child: Text(
-                        'gd: ${teams[index++].gd}',
+                        'gd: ${clubs[index++].gd}',
                         style: const TextStyle(fontSize: 11),
                       ),
                     ),
@@ -73,58 +73,58 @@ class LeageTable extends StatelessWidget {
               .toList(),
         )
         // ListView.builder(
-        //   itemCount: teams.length,
+        //   itemCount: clubs.length,
         //   itemBuilder: (context, index) => Row(children: [
         //     SizedBox(
         //       width: 70,
-        //       child: Text(teams[index].name),
+        //       child: Text(clubs[index].name),
         //     ),
         //     SizedBox(
         //       width: 60,
         //       child: Text(
-        //         'pts: ${teams[index].pts}',
+        //         'pts: ${clubs[index].pts}',
         //         style: const TextStyle(fontSize: 12),
         //       ),
         //     ),
         //     SizedBox(
         //       width: 40,
         //       child: Text(
-        //         'W: ${teams[index].won}',
+        //         'W: ${clubs[index].won}',
         //         style: const TextStyle(fontSize: 12),
         //       ),
         //     ),
         //     SizedBox(
         //       width: 40,
         //       child: Text(
-        //         'D: ${teams[index].drawn}',
+        //         'D: ${clubs[index].drawn}',
         //         style: const TextStyle(fontSize: 12),
         //       ),
         //     ),
         //     SizedBox(
         //       width: 40,
         //       child: Text(
-        //         'L: ${teams[index].lost}',
+        //         'L: ${clubs[index].lost}',
         //         style: const TextStyle(fontSize: 12),
         //       ),
         //     ),
         //     SizedBox(
         //       width: 50,
         //       child: Text(
-        //         'gf: ${teams[index].gf}',
+        //         'gf: ${clubs[index].gf}',
         //         style: const TextStyle(fontSize: 12),
         //       ),
         //     ),
         //     SizedBox(
         //       width: 50,
         //       child: Text(
-        //         'ga: ${teams[index].ga}',
+        //         'ga: ${clubs[index].ga}',
         //         style: const TextStyle(fontSize: 12),
         //       ),
         //     ),
         //     SizedBox(
         //       width: 50,
         //       child: Text(
-        //         'gd: ${teams[index].gd}',
+        //         'gd: ${clubs[index].gd}',
         //         style: const TextStyle(fontSize: 11),
         //       ),
         //     ),

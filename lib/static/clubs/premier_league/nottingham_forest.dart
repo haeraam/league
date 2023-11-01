@@ -1,6 +1,6 @@
-import 'package:leage_simulator/entities/team/team.dart';
+import 'package:leage_simulator/entities/club/club.dart';
 
-Team nottinghamForest = Team(
+Club nottinghamForest = Club(
   name: 'Nottingham',
   fullName: 'Nottingham Forest',
   att: 45,

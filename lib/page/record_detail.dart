@@ -1,43 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:leage_simulator/entities/team/team.dart';
+import 'package:leage_simulator/entities/club/club.dart';
 
 class RecordDetailPage extends StatelessWidget {
-  const RecordDetailPage({super.key, required this.teams});
-  final List<Team> teams;
+  const RecordDetailPage({super.key, required this.clubs});
+  final List<Club> clubs;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
       body: Column(
-          children: teams
-              .map((team) => Row(
+          children: clubs
+              .map((club) => Row(
                     children: [
-                      Text(team.name),
+                      Text(club.name),
                       SizedBox(
                         width: 8,
                       ),
-                      Text('승점:${team.pts}'),
+                      Text('승점:${club.pts}'),
                       SizedBox(
                         width: 8,
                       ),
-                      Text('power:${team.att + team.mid + team.def}'),
+                      Text('power:${club.att + club.mid + club.def}'),
                       SizedBox(
                         width: 8,
                       ),
-                      Text('승:${team.won}'),
+                      Text('승:${club.won}'),
                       SizedBox(
                         width: 8,
                       ),
-                      Text('무:${team.drawn}'),
+                      Text('무:${club.drawn}'),
                       SizedBox(
                         width: 8,
                       ),
-                      Text('패:${team.lost}'),
+                      Text('패:${club.lost}'),
                       SizedBox(
                         width: 8,
                       ),
-                      Text('F:${team.fundamental}'),
+                      Text('F:${club.fundamental}'),
                     ],
                   ))
               .toList()),
