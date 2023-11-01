@@ -65,7 +65,7 @@ class Club {
     pts = won * 3 + drawn;
   }
 
-  play({required int scored, required int conceded}) {
+  saveResult({required int scored, required int conceded}) {
     gf += scored;
     ga -= conceded;
     gd += (scored - conceded);
@@ -105,11 +105,11 @@ class Club {
   }
 
   get attPower {
-    return (att * 0.17 + mid * 0.3);
+    return (att * 0.05 + mid * 0.2);
   }
 
   get defPower {
-    return (def * 1.45 + mid * 0.35);
+    return (def * 1.65 + mid * 0.35);
   }
 
   @override

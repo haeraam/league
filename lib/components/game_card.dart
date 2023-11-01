@@ -52,8 +52,8 @@ class _GameCardState extends State<GameCard> {
             SizedBox(
               // width: 50,
               child: ElevatedButton(
-                  onPressed: () {
-                    widget.fixture.play();
+                  onPressed: () async {
+                    await widget.fixture.play();
                     setState(() {});
                   },
                   child: Text('play')),
