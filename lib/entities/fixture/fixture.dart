@@ -17,62 +17,51 @@ class Fixture {
   int playTime = 0;
   int homeBallPercent = 0;
   int awayBallPercent = 0;
+  double buildUpBonus = 0;
 
   still() {
-    isHomeOwnBall = !isHomeOwnBall;
-  }
-
-  double getBonus(Vertical v) {
-    double bonus;
-    if (isHomeOwnBall) {
-      bonus = switch (v) {
-        Vertical.away => homeClub.att / awayClub.def,
-        Vertical.center => homeClub.mid / awayClub.mid,
-        Vertical.home => homeClub.def / awayClub.att,
-      };
-    } else {
-      bonus = switch (v) {
-        Vertical.away => awayClub.def / homeClub.att,
-        Vertical.center => awayClub.mid / homeClub.mid,
-        Vertical.home => awayClub.att / homeClub.def,
-      };
+    double totalPower = homeClub.power + awayClub.power;
+    if (Random().nextDouble() > (isHomeOwnBall ? homeClub.power / totalPower : awayClub.power / totalPower)) {
+      buildUpBonus = 0;
+      isHomeOwnBall = !isHomeOwnBall;
     }
-
-    return sqrt(bonus * 2) / 2;
   }
 
   GroundArea longPass({required GroundArea from, required GroundArea to}) {
-    double fromBonus = getBonus(from.v) * 0.15;
-    double toBonus = getBonus(to.v) * 0.1;
-    if (Random().nextDouble() > (-0.1 + fromBonus + toBonus)) {
-      still();
+    if (Random().nextDouble() > 0.8) {
+      return to;
     }
-    return to;
+    still();
+    return from;
   }
 
   GroundArea throughPass({required GroundArea from, required GroundArea to}) {
-    double fromBonus = getBonus(from.v) * 0.25;
-    double toBonus = getBonus(to.v) * 0.15;
-    if (Random().nextDouble() > 0.2 + fromBonus + toBonus) {
-      still();
+    if (Random().nextDouble() > 0.7) {
+      return to;
     }
-    return to;
+    still();
+    return from;
   }
 
   GroundArea cross({required GroundArea from, required GroundArea to}) {
-    double fromBonus = getBonus(from.v) * 0.05;
-    double toBonus = getBonus(to.v) * 0.1;
-    if (Random().nextDouble() > 0.2 + fromBonus + toBonus) {
-      still();
+    if (Random().nextDouble() > 0.75) {
+      return to;
     }
-    return to;
+    still();
+    return from;
+  }
+
+  GroundArea buildUpPass({required GroundArea from, required GroundArea to}) {
+    if (Random().nextDouble() > 0.1) {
+      return to;
+    }
+    still();
+    buildUpBonus += 0.01;
+    return from;
   }
 
   GroundArea shoot({required GroundArea from}) {
-    print('/////////// shoot/////////// ');
-    double fromBonus = sqrt(getBonus(from.v) * 20) / 20;
-    print(fromBonus);
-    if (Random().nextDouble() < 0.05 + fromBonus) {
+    if (Random().nextDouble() < 0.02 + buildUpBonus) {
       isHomeOwnBall ? homeClubScore++ : awayClubScore++;
       isHomeOwnBall = !isHomeOwnBall;
       return GroundArea();
@@ -81,25 +70,19 @@ class Fixture {
     }
   }
 
-  GroundArea buildUpPass({required GroundArea from, required GroundArea to}) {
-    double fromBonus = getBonus(from.v) * 0.4;
-    double toBonus = getBonus(to.v) * 0.3;
-    if (Random().nextDouble() > 0.4 + fromBonus + toBonus) {
-      still();
-    }
-    return to;
-  }
-
   GroundArea playCenter({required GroundArea ballLocation}) {
     Vertical successFront = isHomeOwnBall ? Vertical.away : Vertical.home;
     double ranNum = Random().nextDouble();
 
     return switch (ranNum) {
-      < 0.15 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
-      < 0.4 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: successFront)),
-      < 0.6 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
-      < 0.8 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: Vertical.center)),
-      _ => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: Vertical.center)),
+      < 0.1 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
+      < 0.2 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: successFront)),
+      < 0.3 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: successFront)),
+      < 0.4 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
+      < 0.5 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
+      < 0.6 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: Vertical.center)),
+      < 0.7 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: Vertical.center)),
+      _ => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: Vertical.center)),
     };
   }
 
@@ -109,7 +92,7 @@ class Fixture {
 
     return switch (ranNum) {
       < 0.1 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
-      < 0.4 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: successFront)),
+      < 0.3 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: successFront)),
       < 0.6 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
       < 0.7 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
       < 0.8 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: Vertical.center)),
@@ -122,9 +105,9 @@ class Fixture {
     double ranNum = Random().nextDouble();
 
     return switch (ranNum) {
-      < 0.05 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
+      < 0.55 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
       < 0.15 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: successFront)),
-      < 0.5 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
+      < 0.6 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
       < 0.65 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
       < 0.8 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: Vertical.center)),
       _ => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: Vertical.center)),
@@ -137,10 +120,10 @@ class Fixture {
 
     return switch (ranNum) {
       < 0.1 => longPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
-      < 0.3 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
-      < 0.5 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: Vertical.center)),
+      < 0.2 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
+      < 0.6 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: Vertical.center)),
       < 0.7 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: Vertical.center)),
-      < 0.9 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: ballLocation.v)),
+      < 1.4 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: ballLocation.v)),
       _ => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: ballLocation.v)),
     };
   }
@@ -151,8 +134,8 @@ class Fixture {
 
     return switch (ranNum) {
       < 0.1 => longPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
-      < 0.3 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
-      < 0.4 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: Vertical.center)),
+      < 0.2 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
+      < 0.3 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: Vertical.center)),
       < 0.6 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: Vertical.center)),
       < 0.8 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: ballLocation.v)),
       _ => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: ballLocation.v)),
@@ -165,8 +148,8 @@ class Fixture {
 
     return switch (ranNum) {
       < 0.1 => longPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
-      < 0.3 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
-      < 0.4 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: Vertical.center)),
+      < 0.2 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
+      < 0.3 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: Vertical.center)),
       < 0.6 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: Vertical.center)),
       < 0.8 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: ballLocation.v)),
       _ => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: ballLocation.v)),
@@ -177,7 +160,7 @@ class Fixture {
     double ranNum = Random().nextDouble();
 
     return switch (ranNum) {
-      < 0.5 => shoot(from: ballLocation),
+      < 0.7 => shoot(from: ballLocation),
       _ => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: ballLocation.v)),
     };
   }
@@ -186,8 +169,8 @@ class Fixture {
     double ranNum = Random().nextDouble();
 
     return switch (ranNum) {
-      < 0.2 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: ballLocation.v)),
-      < 0.4 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: ballLocation.v)),
+      < 0.7 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: ballLocation.v)),
+      < 0.3 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: ballLocation.v)),
       _ => cross(from: ballLocation, to: GroundArea(h: Horizental.center, v: ballLocation.v)),
     };
   }
@@ -196,7 +179,7 @@ class Fixture {
     double ranNum = Random().nextDouble();
 
     return switch (ranNum) {
-      < 0.4 => shoot(from: ballLocation),
+      < 0.3 => shoot(from: ballLocation),
       < 0.7 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: ballLocation.v)),
       _ => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: ballLocation.v)),
     };

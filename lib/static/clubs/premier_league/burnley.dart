@@ -5,4 +5,5 @@ Club burnley = Club(
   att: 25,
   def: 25,
   mid: 25,
+  attPercent: 0.1,
 );

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:leage_simulator/entities/club/enum.dart';
 
 class Club {
@@ -67,7 +69,7 @@ class Club {
 
   saveResult({required int scored, required int conceded}) {
     gf += scored;
-    ga -= conceded;
+    ga += conceded;
     gd += (scored - conceded);
     if (scored > conceded) {
       win();
@@ -102,6 +104,10 @@ class Club {
     noWinStack++;
     noLoseStack = 0;
     winStack = 0;
+  }
+
+  get power {
+    return sqrt(att + mid + def);
   }
 
   get attPower {
