@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:leage_simulator/components/club_card.dart';
 import 'package:leage_simulator/entities/fixture/fixture.dart';
 import 'package:leage_simulator/entities/club/club.dart';
@@ -55,8 +58,9 @@ class _GameCardState extends State<GameCard> {
               // width: 50,
               child: ElevatedButton(
                   onPressed: () async {
-                    await widget.fixture.play();
-                    setState(() {});
+                    context.push('/game', extra: widget.fixture);
+                    // await widget.fixture.play();
+                    // setState(() {});
                   },
                   child: Text('play')),
             ),

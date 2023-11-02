@@ -26,7 +26,9 @@ class Fixture {
   int homeBallPercent = 0;
   int awayBallPercent = 0;
   double buildUpBonus = 0;
-  bool passLogging = false;
+  bool passLogging = true;
+  GroundArea ballLocation = GroundArea();
+  double time = 0;
 
   bool still({required GroundArea area, required StillLevel stillLevel}) {
     double attackerPower = switch (isHomeOwnBall) {
@@ -67,7 +69,7 @@ class Fixture {
 
     double totalPower = attackerPower + defenderPower;
     if (Random().nextDouble() - stillLevelBonus - buildUpBonus > (attackerPower / totalPower)) {
-      if (passLogging) print('${!isHomeOwnBall ? homeClub.name : awayClub.name}[[<<<<<<<<<<<<<<still]]');
+      if (passLogging) print('${!isHomeOwnBall ? homeClub.name : awayClub.name}[[<<<<still]]');
       buildUpBonus = 0;
       isHomeOwnBall = !isHomeOwnBall;
       return true;
@@ -266,56 +268,56 @@ class Fixture {
     };
   }
 
-  play() async {
-    if (played) return;
-    GroundArea ballLocation = GroundArea();
-    double time = 0;
-    while (time < 100) {
-      // await Future.delayed(Duration(milliseconds: 100));
+  playNext() {
+    switch (ballLocation.v) {
+      case Vertical.home:
+        switch (ballLocation.h) {
+          case Horizental.side:
+            ballLocation = isHomeOwnBall ? playDefenceSide(ballLocation: ballLocation) : playAttackSide(ballLocation: ballLocation);
+            break;
+          case Horizental.halfSpace:
+            ballLocation = isHomeOwnBall ? playDefenceHalfSpace(ballLocation: ballLocation) : playAttackHalfSpace(ballLocation: ballLocation);
+            break;
+          case Horizental.center:
+            ballLocation = isHomeOwnBall ? playDefenceCenter(ballLocation: ballLocation) : playAttackCenter(ballLocation: ballLocation);
+            break;
+        }
+        break;
+      case Vertical.center:
+        switch (ballLocation.h) {
+          case Horizental.side:
+            ballLocation = playCenterSide(ballLocation: ballLocation);
+            break;
+          case Horizental.halfSpace:
+            ballLocation = playCenterHalfSpace(ballLocation: ballLocation);
+            break;
+          case Horizental.center:
+            ballLocation = playCenter(ballLocation: ballLocation);
+            break;
+        }
+        break;
+      case Vertical.away:
+        switch (ballLocation.h) {
+          case Horizental.side:
+            ballLocation = !isHomeOwnBall ? playDefenceSide(ballLocation: ballLocation) : playAttackSide(ballLocation: ballLocation);
+            break;
+          case Horizental.halfSpace:
+            ballLocation = !isHomeOwnBall ? playDefenceHalfSpace(ballLocation: ballLocation) : playAttackHalfSpace(ballLocation: ballLocation);
+            break;
+          case Horizental.center:
+            ballLocation = !isHomeOwnBall ? playDefenceCenter(ballLocation: ballLocation) : playAttackCenter(ballLocation: ballLocation);
+            break;
+        }
+        break;
+    }
+    time += 0.5;
+    isHomeOwnBall ? homeBallPercent++ : awayBallPercent++;
+  }
 
-      switch (ballLocation.v) {
-        case Vertical.home:
-          switch (ballLocation.h) {
-            case Horizental.side:
-              ballLocation = isHomeOwnBall ? playDefenceSide(ballLocation: ballLocation) : playAttackSide(ballLocation: ballLocation);
-              break;
-            case Horizental.halfSpace:
-              ballLocation = isHomeOwnBall ? playDefenceHalfSpace(ballLocation: ballLocation) : playAttackHalfSpace(ballLocation: ballLocation);
-              break;
-            case Horizental.center:
-              ballLocation = isHomeOwnBall ? playDefenceCenter(ballLocation: ballLocation) : playAttackCenter(ballLocation: ballLocation);
-              break;
-          }
-          break;
-        case Vertical.center:
-          switch (ballLocation.h) {
-            case Horizental.side:
-              ballLocation = playCenterSide(ballLocation: ballLocation);
-              break;
-            case Horizental.halfSpace:
-              ballLocation = playCenterHalfSpace(ballLocation: ballLocation);
-              break;
-            case Horizental.center:
-              ballLocation = playCenter(ballLocation: ballLocation);
-              break;
-          }
-          break;
-        case Vertical.away:
-          switch (ballLocation.h) {
-            case Horizental.side:
-              ballLocation = !isHomeOwnBall ? playDefenceSide(ballLocation: ballLocation) : playAttackSide(ballLocation: ballLocation);
-              break;
-            case Horizental.halfSpace:
-              ballLocation = !isHomeOwnBall ? playDefenceHalfSpace(ballLocation: ballLocation) : playAttackHalfSpace(ballLocation: ballLocation);
-              break;
-            case Horizental.center:
-              ballLocation = !isHomeOwnBall ? playDefenceCenter(ballLocation: ballLocation) : playAttackCenter(ballLocation: ballLocation);
-              break;
-          }
-          break;
-      }
-      time += 0.5;
-      isHomeOwnBall ? homeBallPercent++ : awayBallPercent++;
+  autoPlay() async {
+    if (played) return;
+    while (time < 100) {
+      playNext();
     }
 
     homeClub.saveResult(scored: homeClubScore, conceded: awayClubScore);

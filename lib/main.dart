@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:leage_simulator/entities/club/club.dart';
+import 'package:leage_simulator/entities/fixture/fixture.dart';
+import 'package:leage_simulator/page/game_page.dart';
 import 'package:leage_simulator/page/home_page.dart';
 import 'package:leage_simulator/page/record_detail.dart';
 
@@ -15,10 +17,17 @@ final _router = GoRouter(
       builder: (context, state) => const HomePage(),
     ),
     GoRoute(
-        path: '/record_detail',
-        builder: (context, state) {
-          return RecordDetailPage(clubs: state.extra as List<Club>);
-        }),
+      path: '/record_detail',
+      builder: (context, state) {
+        return RecordDetailPage(clubs: state.extra as List<Club>);
+      },
+    ),
+    GoRoute(
+      path: '/game',
+      builder: (context, state) {
+        return GamePage(fixture: state.extra as Fixture);
+      },
+    ),
   ],
 );
 

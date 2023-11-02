@@ -165,7 +165,7 @@ class League {
   playAllFixture() async {
     if (!finishedRound) {
       for (var fixture in season[round]) {
-        fixture.play();
+        fixture.autoPlay();
       }
 
       clubs.sort((a, b) {
