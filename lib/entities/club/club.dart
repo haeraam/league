@@ -22,6 +22,7 @@ class Club {
     this.playStyle = PlayStyle.none,
     this.attPercent = 0.5,
     this.fundamental = 0.0,
+    this.ownPercent = 0.0,
     String? fullName,
   }) {
     fullName = fullName ?? name;
@@ -48,6 +49,7 @@ class Club {
   int def;
   double attPercent;
   PlayStyle playStyle;
+  double ownPercent;
 
   clear() {
     pts = 0;

@@ -13,6 +13,7 @@ class League {
   late final List<Club> _initialClub;
   List<Club> clubs;
   List<List<Club>> record = [];
+  List<List<List<Fixture>>> fixtureRecord = [];
   bool finishedRound = false;
   bool finishedLeague = true;
 
@@ -148,6 +149,7 @@ class League {
     if (finishedRound) {
       if (finishedLeague) {
         record.add(clubs);
+        fixtureRecord.add(season);
         startNewSeason();
       } else {
         if (season.length - 1 > round) {

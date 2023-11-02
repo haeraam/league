@@ -2,6 +2,14 @@
 import 'dart:math';
 
 import 'package:leage_simulator/entities/club/club.dart';
+import 'package:leage_simulator/entities/club/enum.dart';
+
+enum StillLevel {
+  easy,
+  normal,
+  hard,
+  veryHard,
+}
 
 class Fixture {
   Fixture({
@@ -18,83 +26,155 @@ class Fixture {
   int homeBallPercent = 0;
   int awayBallPercent = 0;
   double buildUpBonus = 0;
+  bool passLogging = false;
 
-  still() {
-    double totalPower = homeClub.power + awayClub.power;
-    if (Random().nextDouble() > (isHomeOwnBall ? homeClub.power / totalPower : awayClub.power / totalPower)) {
+  bool still({required GroundArea area, required StillLevel stillLevel}) {
+    double attackerPower = switch (isHomeOwnBall) {
+      true => switch (area.v) {
+          Vertical.home => homeClub.def.toDouble(),
+          Vertical.center => homeClub.mid.toDouble(),
+          Vertical.away => homeClub.att.toDouble(),
+        },
+      false => switch (area.v) {
+          Vertical.home => awayClub.att.toDouble(),
+          Vertical.center => awayClub.mid.toDouble(),
+          Vertical.away => awayClub.def.toDouble(),
+        },
+    };
+
+    double defenderPower = switch (isHomeOwnBall) {
+      true => switch (area.v) {
+          Vertical.home => awayClub.att * 0.5,
+          Vertical.center => awayClub.mid.toDouble(),
+          Vertical.away => awayClub.def.toDouble(),
+        },
+      false => switch (area.v) {
+          Vertical.home => homeClub.def * 0.5,
+          Vertical.center => homeClub.mid.toDouble(),
+          Vertical.away => homeClub.att.toDouble(),
+        },
+    };
+
+    double stillLevelBonus = switch (stillLevel) {
+      StillLevel.easy => 0.15,
+      StillLevel.normal => 0.25,
+      StillLevel.hard => 0.5,
+      StillLevel.veryHard => 0.65,
+    };
+
+    attackerPower = sqrt(sqrt(attackerPower));
+    defenderPower = sqrt(defenderPower);
+
+    double totalPower = attackerPower + defenderPower;
+    if (Random().nextDouble() - stillLevelBonus - buildUpBonus > (attackerPower / totalPower)) {
+      if (passLogging) print('${!isHomeOwnBall ? homeClub.name : awayClub.name}[[<<<<<<<<<<<<<<still]]');
       buildUpBonus = 0;
       isHomeOwnBall = !isHomeOwnBall;
+      return true;
+    } else {
+      return false;
     }
   }
 
   GroundArea longPass({required GroundArea from, required GroundArea to}) {
-    if (Random().nextDouble() > 0.8) {
-      return to;
-    }
-    still();
-    return from;
+    if (passLogging) print('${isHomeOwnBall ? homeClub.name : awayClub.name}[[longPass]]');
+    bool isStillFrom = false;
+    isStillFrom = still(area: from, stillLevel: StillLevel.veryHard);
+    if (isStillFrom) return from;
+    still(area: to, stillLevel: StillLevel.easy);
+    return to;
   }
 
   GroundArea throughPass({required GroundArea from, required GroundArea to}) {
-    if (Random().nextDouble() > 0.7) {
-      return to;
-    }
-    still();
-    return from;
+    if (passLogging) print('${isHomeOwnBall ? homeClub.name : awayClub.name}[[throughPass]]');
+    bool isStillFrom = false;
+    isStillFrom = still(area: from, stillLevel: StillLevel.normal);
+    if (isStillFrom) return from;
+    still(area: to, stillLevel: StillLevel.easy);
+    return to;
   }
 
   GroundArea cross({required GroundArea from, required GroundArea to}) {
-    if (Random().nextDouble() > 0.75) {
-      return to;
-    }
-    still();
-    return from;
-  }
-
-  GroundArea buildUpPass({required GroundArea from, required GroundArea to}) {
-    if (Random().nextDouble() > 0.1) {
-      return to;
-    }
-    still();
-    buildUpBonus += 0.01;
-    return from;
-  }
-
-  GroundArea shoot({required GroundArea from}) {
-    if (Random().nextDouble() < 0.02 + buildUpBonus) {
-      isHomeOwnBall ? homeClubScore++ : awayClubScore++;
-      isHomeOwnBall = !isHomeOwnBall;
+    if (passLogging) print('${isHomeOwnBall ? homeClub.name : awayClub.name}[[cross]]');
+    bool isStillFrom = false;
+    isStillFrom = still(area: from, stillLevel: StillLevel.hard);
+    if (isStillFrom) return from;
+    //헤딩 슛
+    if (Random().nextDouble() < 0.25 + buildUpBonus) {
+      gall();
       return GroundArea();
     } else {
+      still(area: to, stillLevel: StillLevel.easy);
       return from;
     }
   }
 
+  GroundArea buildUpPass({required GroundArea from, required GroundArea to}) {
+    if (passLogging) print('${isHomeOwnBall ? homeClub.name : awayClub.name}[[buildUpPass]]');
+    bool isStillFrom = false;
+    isStillFrom = still(area: from, stillLevel: StillLevel.veryHard);
+    if (isStillFrom) return from;
+    still(area: to, stillLevel: StillLevel.veryHard);
+    buildUpBonus += 0.01;
+    return to;
+  }
+
+  GroundArea shoot({required GroundArea from}) {
+    if (passLogging) print('${isHomeOwnBall ? homeClub.name : awayClub.name}[[shoot]]');
+    if (Random().nextDouble() < 0.02 + buildUpBonus) {
+      gall();
+      return GroundArea();
+    } else {
+      isHomeOwnBall = !isHomeOwnBall;
+      return from;
+    }
+  }
+
+  gall() {
+    if (passLogging) print('${isHomeOwnBall ? homeClub.name : awayClub.name}[[gall!!!!!!!!!!!!!]]');
+    isHomeOwnBall ? homeClubScore++ : awayClubScore++;
+    isHomeOwnBall = !isHomeOwnBall;
+  }
+
+  double getPlayNumber() {
+    PlayStyle playStyle = isHomeOwnBall ? homeClub.playStyle : awayClub.playStyle;
+    double playStyleBonus = switch (playStyle) {
+      PlayStyle.counter => 0,
+      PlayStyle.none => 0,
+      PlayStyle.pass => 0.3,
+      PlayStyle.press => 0,
+    };
+
+    double ranNum = Random().nextDouble() + playStyleBonus;
+
+    return ranNum;
+  }
+
   GroundArea playCenter({required GroundArea ballLocation}) {
     Vertical successFront = isHomeOwnBall ? Vertical.away : Vertical.home;
-    double ranNum = Random().nextDouble();
+
+    double ranNum = getPlayNumber();
 
     return switch (ranNum) {
       < 0.1 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
       < 0.2 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: successFront)),
       < 0.3 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: successFront)),
+      < 0.35 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
       < 0.4 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
-      < 0.5 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
       < 0.6 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: Vertical.center)),
-      < 0.7 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: Vertical.center)),
       _ => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: Vertical.center)),
     };
   }
 
   GroundArea playCenterHalfSpace({required GroundArea ballLocation}) {
     Vertical successFront = isHomeOwnBall ? Vertical.away : Vertical.home;
-    double ranNum = Random().nextDouble();
+    double ranNum = getPlayNumber();
 
     return switch (ranNum) {
       < 0.1 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
-      < 0.3 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: successFront)),
-      < 0.6 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
-      < 0.7 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
+      < 0.25 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: successFront)),
+      < 0.5 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
+      < 0.6 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
       < 0.8 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: Vertical.center)),
       _ => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: Vertical.center)),
     };
@@ -102,13 +182,13 @@ class Fixture {
 
   GroundArea playCenterSide({required GroundArea ballLocation}) {
     Vertical successFront = isHomeOwnBall ? Vertical.away : Vertical.home;
-    double ranNum = Random().nextDouble();
+    double ranNum = getPlayNumber();
 
     return switch (ranNum) {
-      < 0.55 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
+      < 0.05 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
       < 0.15 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: successFront)),
-      < 0.6 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
-      < 0.65 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
+      < 0.4 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
+      < 0.5 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
       < 0.8 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: Vertical.center)),
       _ => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: Vertical.center)),
     };
@@ -116,21 +196,21 @@ class Fixture {
 
   GroundArea playDefenceCenter({required GroundArea ballLocation}) {
     Vertical successFront = isHomeOwnBall ? Vertical.away : Vertical.home;
-    double ranNum = Random().nextDouble();
+    double ranNum = getPlayNumber();
 
     return switch (ranNum) {
       < 0.1 => longPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
       < 0.2 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
-      < 0.6 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: Vertical.center)),
-      < 0.7 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: Vertical.center)),
-      < 1.4 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: ballLocation.v)),
+      < 0.3 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: Vertical.center)),
+      < 0.6 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: Vertical.center)),
+      < 0.8 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: ballLocation.v)),
       _ => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: ballLocation.v)),
     };
   }
 
   GroundArea playDefenceSide({required GroundArea ballLocation}) {
     Vertical successFront = isHomeOwnBall ? Vertical.away : Vertical.home;
-    double ranNum = Random().nextDouble();
+    double ranNum = getPlayNumber();
 
     return switch (ranNum) {
       < 0.1 => longPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
@@ -144,7 +224,7 @@ class Fixture {
 
   GroundArea playDefenceHalfSpace({required GroundArea ballLocation}) {
     Vertical successFront = isHomeOwnBall ? Vertical.away : Vertical.home;
-    double ranNum = Random().nextDouble();
+    double ranNum = getPlayNumber();
 
     return switch (ranNum) {
       < 0.1 => longPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
@@ -157,7 +237,7 @@ class Fixture {
   }
 
   GroundArea playAttackCenter({required GroundArea ballLocation}) {
-    double ranNum = Random().nextDouble();
+    double ranNum = getPlayNumber();
 
     return switch (ranNum) {
       < 0.7 => shoot(from: ballLocation),
@@ -166,21 +246,22 @@ class Fixture {
   }
 
   GroundArea playAttackSide({required GroundArea ballLocation}) {
-    double ranNum = Random().nextDouble();
+    double ranNum = getPlayNumber();
 
     return switch (ranNum) {
-      < 0.7 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: ballLocation.v)),
-      < 0.3 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: ballLocation.v)),
-      _ => cross(from: ballLocation, to: GroundArea(h: Horizental.center, v: ballLocation.v)),
+      < 0.1 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: ballLocation.v)),
+      < 0.25 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: ballLocation.v)),
+      < 0.7 => cross(from: ballLocation, to: GroundArea(h: Horizental.center, v: ballLocation.v)),
+      _ => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: Vertical.center)),
     };
   }
 
   GroundArea playAttackHalfSpace({required GroundArea ballLocation}) {
-    double ranNum = Random().nextDouble();
+    double ranNum = getPlayNumber();
 
     return switch (ranNum) {
-      < 0.3 => shoot(from: ballLocation),
-      < 0.7 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: ballLocation.v)),
+      < 0.4 => shoot(from: ballLocation),
+      < 0.75 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: ballLocation.v)),
       _ => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: ballLocation.v)),
     };
   }
@@ -190,6 +271,8 @@ class Fixture {
     GroundArea ballLocation = GroundArea();
     double time = 0;
     while (time < 100) {
+      // await Future.delayed(Duration(milliseconds: 100));
+
       switch (ballLocation.v) {
         case Vertical.home:
           switch (ballLocation.h) {

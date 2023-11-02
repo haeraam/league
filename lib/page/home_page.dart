@@ -179,7 +179,9 @@ class _HomePageState extends State<HomePage> {
             ...pl.record
                 .map((record) => GestureDetector(
                       onTap: () {
-                        context.push('/record_detail', extra: record);
+                        context.push('/record_detail', extra: {
+                          'record': record,
+                        });
                       },
                       child: Row(
                         children: [

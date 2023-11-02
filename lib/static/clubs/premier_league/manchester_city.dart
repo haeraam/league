@@ -1,4 +1,5 @@
 import 'package:leage_simulator/entities/club/club.dart';
+import 'package:leage_simulator/entities/club/enum.dart';
 
 Club manchesterCity = Club(
   name: 'ManCity',
@@ -6,4 +7,5 @@ Club manchesterCity = Club(
   att: 100,
   mid: 90,
   def: 90,
+  playStyle: PlayStyle.pass,
 );
