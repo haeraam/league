@@ -5,5 +5,6 @@ Club chelsea = Club(
   att: 75,
   def: 75,
   mid: 75,
-  homeColor: ClubColor.blue
+  homeColor: ClubColor.blue,
+  fundamental: 20,
 );

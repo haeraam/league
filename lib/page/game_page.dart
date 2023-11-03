@@ -14,7 +14,7 @@ class GamePage extends StatefulWidget {
 
 class _GamePageState extends State<GamePage> {
   GlobalKey key = GlobalKey();
-  double ballSize = 35.0;
+  double ballSize = 25.0;
   bool setSize = false;
   double _width = 0;
   double _height = 0;
@@ -24,19 +24,32 @@ class _GamePageState extends State<GamePage> {
   double marginTop = 0;
   int beforeScore = 0;
   bool isVisiblaGoalText = false;
+  bool isHomeGoal = false;
+  bool isAwayGoal = false;
 
-  Duration _gameSpeed = Duration(milliseconds: 200);
+  Duration _gameSpeed = const Duration(milliseconds: 200);
 
-  setBall() {
+  setBall({bool goal = false}) {
+    if (goal) {
+      marginLeft = _width * 2.5 - ballSize / 2;
+      if (widget.fixture.isHomeOwnBall) {
+        marginTop = _height * 0.5 - ballSize / 2 - 50;
+      } else {
+        marginTop = _height * 2.5 - ballSize / 2 + 50;
+      }
+      setState(() {});
+      return;
+    }
+
     switch (widget.fixture.ballLocation.v) {
       case Vertical.away:
-        marginTop = _height * 0.5 - ballSize / 2;
+        marginTop = _height * 0.5 - ballSize / 2 + 20;
         break;
       case Vertical.center:
         marginTop = _height * 1.5 - ballSize / 2;
         break;
       case Vertical.home:
-        marginTop = _height * 2.5 - ballSize / 2;
+        marginTop = _height * 2.5 - ballSize / 2 - 20;
         break;
     }
 
@@ -63,9 +76,12 @@ class _GamePageState extends State<GamePage> {
         isVisiblaGoalText = true;
       });
       beforeScore = widget.fixture.homeClubScore + widget.fixture.awayClubScore;
-      await Future.delayed(Duration(milliseconds: 1300));
+      setBall(goal: true);
+
+      await Future.delayed(const Duration(milliseconds: 2000));
     }
     await Future.delayed(_gameSpeed);
+
     setState(() {
       isVisiblaGoalText = false;
     });
@@ -77,13 +93,14 @@ class _GamePageState extends State<GamePage> {
     return switch (color) {
       ClubColor.black => Colors.black,
       ClubColor.blue => Colors.blue,
-      ClubColor.deepRed => Color.fromARGB(255, 108, 11, 11),
+      ClubColor.deepRed => const Color.fromARGB(255, 108, 11, 11),
       ClubColor.green => Colors.green,
       ClubColor.purple => Colors.purple,
       ClubColor.red => Colors.red,
       ClubColor.white => Colors.white,
       ClubColor.orange => Colors.orange,
-      ClubColor.skyBlue => Color.fromARGB(255, 85, 201, 255),
+      ClubColor.skyBlue => const Color.fromARGB(255, 85, 201, 255),
+      ClubColor.yello => Colors.yellow,
     };
   }
 
@@ -97,7 +114,7 @@ class _GamePageState extends State<GamePage> {
         setSize = true;
       }
     });
-    Widget background = Container(color: Color.fromARGB(255, 151, 198, 153), key: key);
+    Widget background = Container(color: const Color.fromARGB(255, 151, 198, 153), key: key);
 
     Color homeColor = getFlutterColor(widget.fixture.homeClub.homeColor);
     Color awayColor = getFlutterColor(widget.fixture.awayClub.homeColor == widget.fixture.homeClub.homeColor ? widget.fixture.awayClub.awayColor : widget.fixture.awayClub.homeColor);
@@ -120,20 +137,20 @@ class _GamePageState extends State<GamePage> {
                     onChanged: (val) {
                       _isFastGame = val ?? false;
                       setState(() {
-                        _gameSpeed = val ?? false ? Duration(milliseconds: 35) : Duration(milliseconds: 200);
+                        _gameSpeed = val ?? false ? const Duration(milliseconds: 35) : const Duration(milliseconds: 200);
                       });
                     }),
                 ElevatedButton(
                     onPressed: () async {
                       play();
                     },
-                    child: Text('start')),
+                    child: const Text('start')),
               ],
             ),
             Row(
               children: [
                 Text('Time: ${widget.fixture.time}'),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 Text('${awayBallPercent.toStringAsFixed(1)}%'),
                 Container(
                   width: 20,
@@ -141,7 +158,7 @@ class _GamePageState extends State<GamePage> {
                   color: awayColor,
                 ),
                 Text('${widget.fixture.awayClub.name} ${widget.fixture.awayClubScore}'),
-                Text(':'),
+                const Text(':'),
                 Text('${widget.fixture.homeClubScore} ${widget.fixture.homeClub.name}'),
                 Container(
                   width: 20,
@@ -151,70 +168,96 @@ class _GamePageState extends State<GamePage> {
                 Text('${homeBallPercent.toStringAsFixed(1)}%'),
               ],
             ),
-            Stack(
-              children: [
-                Container(
-                  width: double.infinity,
-                  child: AspectRatio(
-                    aspectRatio: 75 / 100,
-                    child: Stack(
-                      children: [
-                        background,
-                        Column(
-                          children: [
-                            AnimatedContainer(
-                              height: marginTop,
-                              duration: _gameSpeed,
-                            ),
-                            Row(
+            Container(
+              padding: const EdgeInsets.all(24),
+              child: Stack(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: AspectRatio(
+                      aspectRatio: 75 / 100,
+                      child: Stack(
+                        children: [
+                          background,
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            width: double.infinity,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                AnimatedContainer(
-                                  width: marginLeft,
-                                  duration: _gameSpeed,
+                                Image.asset(
+                                  'assets/goal_post.png',
+                                  height: 50,
                                 ),
-                                Visibility(
-                                  visible: !isVisiblaGoalText,
-                                  child: Container(
+                                Container(
+                                  height: max(0, _height * 3 - 100 - 16),
+                                ),
+                                Transform.rotate(
+                                  angle: pi,
+                                  child: Image.asset(
+                                    'assets/goal_post.png',
+                                    height: 50,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          Column(
+                            children: [
+                              AnimatedContainer(
+                                height: marginTop,
+                                duration: _gameSpeed,
+                              ),
+                              Row(
+                                children: [
+                                  AnimatedContainer(
+                                    width: marginLeft,
+                                    duration: _gameSpeed,
+                                  ),
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 400),
                                     decoration: BoxDecoration(
-                                      color: widget.fixture.isHomeOwnBall ? homeColor : awayColor,
+                                      color: widget.fixture.isHomeOwnBall ? (isVisiblaGoalText ? awayColor : homeColor) : (isVisiblaGoalText ? homeColor : awayColor),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
-                                    width: 35,
-                                    height: 35,
+                                    width: ballSize,
+                                    height: ballSize,
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                          Center(
+                              child: Visibility(
+                            visible: isVisiblaGoalText,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(!widget.fixture.isHomeOwnBall ? widget.fixture.homeClub.name : widget.fixture.awayClub.name,
+                                    style: TextStyle(
+                                      color: !widget.fixture.isHomeOwnBall ? homeColor : awayColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 30,
+                                    )),
+                                const Text(
+                                  'Goal!!!!!!!',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 30,
                                   ),
                                 ),
                               ],
-                            )
-                          ],
-                        ),
-                        Center(
-                            child: Visibility(
-                          visible: isVisiblaGoalText,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text('${!widget.fixture.isHomeOwnBall ? widget.fixture.homeClub.name : widget.fixture.awayClub.name}',
-                                  style: TextStyle(
-                                    color: !widget.fixture.isHomeOwnBall ? homeColor : awayColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 30,
-                                  )),
-                              Text(
-                                'Goal!!!!!!!',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 30,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )),
-                      ],
+                            ),
+                          )),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

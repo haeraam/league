@@ -6,5 +6,6 @@ Club manchesterUnited = Club(
   att: 65,
   mid: 95,
   def: 55,
-  homeColor: ClubColor.red
+  homeColor: ClubColor.red,
+  fundamental: 20,
 );

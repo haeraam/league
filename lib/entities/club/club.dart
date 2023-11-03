@@ -12,6 +12,7 @@ enum ClubColor {
   green,
   white,
   orange,
+  yello,
 }
 
 class Club {
