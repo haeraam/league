@@ -6,4 +6,5 @@ Club crystalPalace = Club(
   att: 50,
   def: 50,
   mid: 50,
+  homeColor: ClubColor.purple
 );

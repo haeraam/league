@@ -5,4 +5,5 @@ Club everton = Club(
   att: 40,
   mid: 45,
   def: 40,
+  homeColor: ClubColor.blue
 );

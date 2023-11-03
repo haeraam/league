@@ -5,4 +5,5 @@ Club bournemouth = Club(
   att: 35,
   def: 35,
   mid: 35,
+  homeColor: ClubColor.red
 );

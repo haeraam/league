@@ -6,4 +6,5 @@ Club westHamUnited = Club(
   att: 60,
   def: 60,
   mid: 60,
+  homeColor: ClubColor.purple
 );

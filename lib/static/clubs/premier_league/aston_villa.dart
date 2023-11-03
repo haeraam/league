@@ -6,4 +6,5 @@ Club astonVilla = Club(
   att: 70,
   def: 70,
   mid: 70,
+  homeColor: ClubColor.purple
 );

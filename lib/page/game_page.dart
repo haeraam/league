@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:leage_simulator/entities/club/club.dart';
 import 'package:leage_simulator/entities/fixture/fixture.dart';
 
 class GamePage extends StatefulWidget {
@@ -17,11 +18,14 @@ class _GamePageState extends State<GamePage> {
   bool setSize = false;
   double _width = 0;
   double _height = 0;
+  bool _isFastGame = false;
 
   double marginLeft = 0;
   double marginTop = 0;
   int beforeScore = 0;
   bool isVisiblaGoalText = false;
+
+  Duration _gameSpeed = Duration(milliseconds: 200);
 
   setBall() {
     switch (widget.fixture.ballLocation.v) {
@@ -59,14 +63,28 @@ class _GamePageState extends State<GamePage> {
         isVisiblaGoalText = true;
       });
       beforeScore = widget.fixture.homeClubScore + widget.fixture.awayClubScore;
-      await Future.delayed(Duration(seconds: 1));
+      await Future.delayed(Duration(milliseconds: 1300));
     }
-    await Future.delayed(Duration(milliseconds: 100));
+    await Future.delayed(_gameSpeed);
     setState(() {
       isVisiblaGoalText = false;
     });
     setBall();
     if (widget.fixture.time < 100) play();
+  }
+
+  Color getFlutterColor(ClubColor color) {
+    return switch (color) {
+      ClubColor.black => Colors.black,
+      ClubColor.blue => Colors.blue,
+      ClubColor.deepRed => Color.fromARGB(255, 108, 11, 11),
+      ClubColor.green => Colors.green,
+      ClubColor.purple => Colors.purple,
+      ClubColor.red => Colors.red,
+      ClubColor.white => Colors.white,
+      ClubColor.orange => Colors.orange,
+      ClubColor.skyBlue => Color.fromARGB(255, 85, 201, 255),
+    };
   }
 
   @override
@@ -79,7 +97,10 @@ class _GamePageState extends State<GamePage> {
         setSize = true;
       }
     });
-    Widget background = Container(color: Colors.green, key: key);
+    Widget background = Container(color: Color.fromARGB(255, 151, 198, 153), key: key);
+
+    Color homeColor = getFlutterColor(widget.fixture.homeClub.homeColor);
+    Color awayColor = getFlutterColor(widget.fixture.awayClub.homeColor == widget.fixture.homeClub.homeColor ? widget.fixture.awayClub.awayColor : widget.fixture.awayClub.homeColor);
 
     int totalPercent = widget.fixture.homeBallPercent + widget.fixture.awayBallPercent;
     double homeBallPercent = widget.fixture.homeBallPercent / totalPercent * 100;
@@ -91,11 +112,24 @@ class _GamePageState extends State<GamePage> {
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
-            ElevatedButton(
-                onPressed: () async {
-                  play();
-                },
-                child: Text('start')),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Checkbox(
+                    value: _isFastGame,
+                    onChanged: (val) {
+                      _isFastGame = val ?? false;
+                      setState(() {
+                        _gameSpeed = val ?? false ? Duration(milliseconds: 35) : Duration(milliseconds: 200);
+                      });
+                    }),
+                ElevatedButton(
+                    onPressed: () async {
+                      play();
+                    },
+                    child: Text('start')),
+              ],
+            ),
             Row(
               children: [
                 Text('Time: ${widget.fixture.time}'),
@@ -104,7 +138,7 @@ class _GamePageState extends State<GamePage> {
                 Container(
                   width: 20,
                   height: 20,
-                  color: Colors.red,
+                  color: awayColor,
                 ),
                 Text('${widget.fixture.awayClub.name} ${widget.fixture.awayClubScore}'),
                 Text(':'),
@@ -112,7 +146,7 @@ class _GamePageState extends State<GamePage> {
                 Container(
                   width: 20,
                   height: 20,
-                  color: Colors.blue,
+                  color: homeColor,
                 ),
                 Text('${homeBallPercent.toStringAsFixed(1)}%'),
               ],
@@ -130,21 +164,24 @@ class _GamePageState extends State<GamePage> {
                           children: [
                             AnimatedContainer(
                               height: marginTop,
-                              duration: Duration(milliseconds: 100),
+                              duration: _gameSpeed,
                             ),
                             Row(
                               children: [
                                 AnimatedContainer(
                                   width: marginLeft,
-                                  duration: Duration(milliseconds: 100),
+                                  duration: _gameSpeed,
                                 ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: widget.fixture.isHomeOwnBall ? Colors.blue : Colors.red,
-                                    borderRadius: BorderRadius.circular(20),
+                                Visibility(
+                                  visible: !isVisiblaGoalText,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: widget.fixture.isHomeOwnBall ? homeColor : awayColor,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    width: 35,
+                                    height: 35,
                                   ),
-                                  width: 35,
-                                  height: 35,
                                 ),
                               ],
                             )
@@ -153,13 +190,24 @@ class _GamePageState extends State<GamePage> {
                         Center(
                             child: Visibility(
                           visible: isVisiblaGoalText,
-                          child: const Text(
-                            'Goal!!!!!!!',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 30,
-                            ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('${!widget.fixture.isHomeOwnBall ? widget.fixture.homeClub.name : widget.fixture.awayClub.name}',
+                                  style: TextStyle(
+                                    color: !widget.fixture.isHomeOwnBall ? homeColor : awayColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 30,
+                                  )),
+                              Text(
+                                'Goal!!!!!!!',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 30,
+                                ),
+                              ),
+                            ],
                           ),
                         )),
                       ],

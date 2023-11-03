@@ -5,4 +5,5 @@ Club brentford = Club(
   att: 55,
   def: 55,
   mid: 55,
+  homeColor: ClubColor.red
 );

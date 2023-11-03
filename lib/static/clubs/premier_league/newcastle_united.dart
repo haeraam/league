@@ -6,4 +6,5 @@ Club newcastleUnited = Club(
   att: 75,
   def: 75,
   mid: 75,
+  homeColor: ClubColor.black
 );

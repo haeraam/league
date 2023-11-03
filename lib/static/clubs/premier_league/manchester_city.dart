@@ -4,8 +4,9 @@ import 'package:leage_simulator/entities/club/enum.dart';
 Club manchesterCity = Club(
   name: 'ManCity',
   fullName: 'Manchester City',
-  att: 100,
-  mid: 90,
-  def: 90,
+  att: 90,
+  mid: 80,
+  def: 80,
   playStyle: PlayStyle.pass,
+  homeColor: ClubColor.skyBlue
 );

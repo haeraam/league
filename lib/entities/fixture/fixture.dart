@@ -269,6 +269,8 @@ class Fixture {
   }
 
   playNext() {
+    if (time >= 100) played = true;
+    if (played) return;
     switch (ballLocation.v) {
       case Vertical.home:
         switch (ballLocation.h) {

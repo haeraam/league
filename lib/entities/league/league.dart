@@ -137,6 +137,8 @@ class League {
         fundamental: fundamental,
         attPercent: club.attPercent,
         playStyle: club.playStyle,
+        homeColor: club.homeColor,
+        awayColor: club.awayColor,
       );
 
       index++;

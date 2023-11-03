@@ -6,4 +6,5 @@ Club lutonTown = Club(
   att: 25,
   def: 25,
   mid: 25,
+  homeColor: ClubColor.skyBlue
 );

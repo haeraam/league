@@ -6,4 +6,5 @@ Club burnley = Club(
   def: 25,
   mid: 25,
   attPercent: 0.1,
+  homeColor: ClubColor.purple
 );

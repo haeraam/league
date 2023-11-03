@@ -6,4 +6,5 @@ Club nottinghamForest = Club(
   att: 45,
   def: 45,
   mid: 45,
+  homeColor: ClubColor.green
 );

@@ -6,4 +6,5 @@ Club sheffieldUnited = Club(
   att: 20,
   def: 20,
   mid: 25,
+  homeColor: ClubColor.blue
 );

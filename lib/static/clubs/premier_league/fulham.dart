@@ -5,4 +5,5 @@ Club fulham = Club(
   att: 85,
   mid: 30,
   def: 40,
+  homeColor: ClubColor.white
 );

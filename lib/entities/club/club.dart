@@ -2,6 +2,18 @@ import 'dart:math';
 
 import 'package:leage_simulator/entities/club/enum.dart';
 
+enum ClubColor {
+  red,
+  deepRed,
+  blue,
+  skyBlue,
+  purple,
+  black,
+  green,
+  white,
+  orange,
+}
+
 class Club {
   Club({
     required this.name,
@@ -24,8 +36,10 @@ class Club {
     this.fundamental = 0.0,
     this.ownPercent = 0.0,
     String? fullName,
+    this.awayColor = ClubColor.black,
+    this.homeColor = ClubColor.green,
   }) {
-    fullName = fullName ?? name;
+    this.fullName = fullName ?? name;
   }
   final String name;
   late final String fullName;
@@ -50,6 +64,8 @@ class Club {
   double attPercent;
   PlayStyle playStyle;
   double ownPercent;
+  ClubColor homeColor;
+  ClubColor awayColor;
 
   clear() {
     pts = 0;

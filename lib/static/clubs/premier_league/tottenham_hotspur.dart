@@ -6,4 +6,5 @@ Club tottenhamHotspur = Club(
   att: 100,
   mid: 70,
   def: 50,
+  homeColor: ClubColor.white
 );
