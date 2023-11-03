@@ -26,7 +26,7 @@ class Fixture {
   int homeBallPercent = 0;
   int awayBallPercent = 0;
   double buildUpBonus = 0;
-  bool passLogging = true;
+  bool passLogging = false;
   GroundArea ballLocation = GroundArea();
   double time = 0;
 
