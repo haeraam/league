@@ -7,7 +7,7 @@ import 'package:leage_simulator/components/league_table.dart';
 import 'package:leage_simulator/entities/fixture/fixture.dart';
 import 'package:leage_simulator/entities/league/league.dart';
 import 'package:leage_simulator/entities/club/club.dart';
-import 'package:leage_simulator/static/clubs/clubs.dart';
+import 'package:leage_simulator/static/clubs/england.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,7 +23,13 @@ class _HomePageState extends State<HomePage> {
   bool _showDetail = true;
   Duration _autoPlaySpeed = const Duration(milliseconds: 300);
 
-  League pl = League(clubs: premierLeagueClubs);
+  late League pl;
+  @override
+  void initState() {
+    super.initState();
+    List<Club> premierLeagueClubs = englandClubsJson.where((club) => club['leagueTier'] == 1).map((json) => Club.fromJson(json)).toList();
+    pl = League(clubs: premierLeagueClubs);
+  }
 
   allReset() {
     pl.allReset();

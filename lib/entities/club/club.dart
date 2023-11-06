@@ -2,19 +2,6 @@ import 'dart:math';
 
 import 'package:leage_simulator/entities/club/enum.dart';
 
-enum ClubColor {
-  red,
-  deepRed,
-  blue,
-  skyBlue,
-  purple,
-  black,
-  green,
-  white,
-  orange,
-  yello,
-}
-
 class Club {
   Club({
     required this.name,
@@ -32,18 +19,23 @@ class Club {
     required this.att,
     required this.mid,
     required this.def,
+    required this.country,
+    required this.leagueTier,
     this.playStyle = PlayStyle.none,
     this.attPercent = 0.5,
     this.fundamental = 0.0,
     this.ownPercent = 0.0,
-    String? fullName,
     this.awayColor = ClubColor.black,
     this.homeColor = ClubColor.green,
+    String? fullName,
   }) {
     this.fullName = fullName ?? name;
   }
   final String name;
   late final String fullName;
+  final Country country;
+  final int leagueTier;
+
   double fundamental;
   int pts;
   int won;
@@ -141,4 +133,29 @@ class Club {
   String toString() {
     return '$name , $won , $drawn , $lost';
   }
+
+  Club.fromJson(Map map)
+      : name = map['name'],
+        att = map['att'],
+        mid = map['mid'],
+        def = map['def'],
+        playStyle = map['playStyle'] ?? PlayStyle.none,
+        homeColor = map['homeColor'] ?? ClubColor.black,
+        awayColor = map['awayColor'] ?? ClubColor.green,
+        country = map['country'],
+        leagueTier = map['leagueTier'],
+        pts = 0,
+        won = 0,
+        drawn = 0,
+        lost = 0,
+        gf = 0,
+        ga = 0,
+        gd = 0,
+        winStack = 0,
+        noLoseStack = 0,
+        loseStack = 0,
+        noWinStack = 0,
+        attPercent = map['attPercent'] ?? 0.5,
+        fundamental = map['fundamental'] ?? 0.0,
+        ownPercent = 0.0;
 }

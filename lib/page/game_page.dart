@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:leage_simulator/entities/club/club.dart';
+import 'package:leage_simulator/entities/club/enum.dart';
 import 'package:leage_simulator/entities/fixture/fixture.dart';
 
 class GamePage extends StatefulWidget {

@@ -139,6 +139,8 @@ class League {
         playStyle: club.playStyle,
         homeColor: club.homeColor,
         awayColor: club.awayColor,
+        country: club.country,
+        leagueTier: club.leagueTier,
       );
 
       index++;
