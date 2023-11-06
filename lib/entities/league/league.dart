@@ -96,10 +96,10 @@ class League {
       getValue({required double randomNum, required double fundamental, required int rankBefore}) {
         int idx = ratedByFundamental.indexWhere((fClub) => club.name == fClub.name);
         double fundamentalBonus = switch (idx) {
-          0 => 0.2,
-          1 => 0.17,
-          2 => 0.13,
-          3 => 0.09,
+          0 => 0.21,
+          1 => 0.175,
+          2 => 0.145,
+          3 => 0.1,
           < 6 => 0.02,
           < 10 => -0.02,
           _ => -0.04,
@@ -110,8 +110,8 @@ class League {
           < 4 => -0.1,
           < 6 => -0.05,
           < 10 => 0,
-          < 17 => 0.05,
-          _ => 0.1,
+          < 17 => 0.065,
+          _ => 0.12,
         };
 
         return switch (randomNum + fundamentalBonus + rankBonus) {

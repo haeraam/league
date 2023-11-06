@@ -5,13 +5,13 @@ const List<Map> englandClubsJson = [
     'name': 'Arsenal',
     'country': Country.england,
     'leagueTier': 1,
-    'att': 65,
-    'mid': 70,
+    'att': 55,
+    'mid': 60,
     'def': 95,
     'playStyle': PlayStyle.pass,
     'homeColor': ClubColor.red,
     'awayColor': ClubColor.yello,
-    'fundamental': 10.0,
+    'fundamental': 30.0,
   },
   {
     'name': 'Villa',
@@ -69,6 +69,7 @@ const List<Map> englandClubsJson = [
     'def': 75,
     'mid': 75,
     'homeColor': ClubColor.blue,
+    'playStyle': PlayStyle.counter,
     'fundamental': 20.0,
   },
   {
@@ -108,6 +109,7 @@ const List<Map> englandClubsJson = [
     'def': 60,
     'homeColor': ClubColor.deepRed,
     'playStyle': PlayStyle.press,
+    'fundamental': 15.0,
   },
   {
     'name': 'LutonTown',

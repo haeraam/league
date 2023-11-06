@@ -29,6 +29,7 @@ class Fixture {
   bool passLogging = false;
   GroundArea ballLocation = GroundArea();
   double time = 0;
+  double counterBonus = 0;
 
   bool still({required GroundArea area, required StillLevel stillLevel}) {
     double attackerPower = switch (isHomeOwnBall) {
@@ -78,6 +79,7 @@ class Fixture {
       if (passLogging) print('${!isHomeOwnBall ? homeClub.name : awayClub.name}[[<<<<still]]');
       buildUpBonus = 0;
       isHomeOwnBall = !isHomeOwnBall;
+      counterBonus = 0.5;
       return true;
     } else {
       return false;
@@ -129,7 +131,7 @@ class Fixture {
 
   GroundArea shoot({required GroundArea from}) {
     if (passLogging) print('${isHomeOwnBall ? homeClub.name : awayClub.name}[[shoot]]');
-    if (Random().nextDouble() < 0.02 + buildUpBonus) {
+    if (Random().nextDouble() < 0.02 + buildUpBonus + counterBonus) {
       gall();
       return GroundArea();
     } else {
@@ -147,7 +149,7 @@ class Fixture {
   double getPlayNumber() {
     PlayStyle playStyle = isHomeOwnBall ? homeClub.playStyle : awayClub.playStyle;
     double playStyleBonus = switch (playStyle) {
-      PlayStyle.counter => Random().nextDouble() > 0.25 ? 0 : -0.3,
+      PlayStyle.counter => Random().nextDouble() > 0.4 ? 0 : -0.2,
       PlayStyle.none => 0,
       PlayStyle.pass => Random().nextDouble() > 0.25 ? 0 : 0.3,
       PlayStyle.press => 0,
@@ -316,6 +318,7 @@ class Fixture {
         }
         break;
     }
+    counterBonus = max(0, counterBonus - 0.1);
     time += 0.5;
     isHomeOwnBall ? homeBallPercent++ : awayBallPercent++;
   }
