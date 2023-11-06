@@ -34,9 +34,9 @@ class _GamePageState extends State<GamePage> {
     if (goal) {
       marginLeft = _width * 2.5 - ballSize / 2;
       if (widget.fixture.isHomeOwnBall) {
-        marginTop = _height * 0.5 - ballSize / 2 - 50;
-      } else {
         marginTop = _height * 2.5 - ballSize / 2 + 50;
+      } else {
+        marginTop = _height * 0.5 - ballSize / 2 - 50;
       }
       setState(() {});
       return;

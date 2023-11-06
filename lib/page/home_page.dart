@@ -80,6 +80,29 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    Map<String, Map<String, dynamic>> clubMap = pl.clubs.fold({}, (value, element) {
+      value[element.name] = {'att': element.att, 'mid': element.mid, 'def': element.def, 'winner': 0};
+      return value;
+    });
+    for (var season in pl.record) {
+      int winner = clubMap[season[0].name]!['winner'];
+      clubMap[season[0].name] = {
+        ...clubMap[season[0].name]!,
+        'winner': winner + 1,
+      };
+    }
+
+    List clibList = clubMap.entries.map((e) => [e.key, e.value]).toList();
+    clibList.sort(
+      (a, b) {
+        if (b[1]['winner'] == a[1]['winner']) {
+          return b[0].compareTo(a[0]);
+        } else {
+          return b[1]['winner'] - a[1]['winner'];
+        }
+      },
+    );
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -182,6 +205,14 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             LeageTable(clubs: pl.clubs),
+            SizedBox(
+              height: 20,
+            ),
+            Column(
+              children: clibList.map((e) {
+                return e[1]['winner'] > 0 ? Text('${e[0]} ${e[1]['winner']}회 우승/ 현재 스텟 ${e[1]['att']} - ${e[1]['mid']} -${e[1]['def']} ') : Container();
+              }).toList(),
+            ),
             ...pl.record
                 .map((record) => GestureDetector(
                       onTap: () {
@@ -199,7 +230,7 @@ class _HomePageState extends State<HomePage> {
                 .toList(),
             const SizedBox(
               height: 100,
-            )
+            ),
           ],
         ),
       ),

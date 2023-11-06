@@ -108,7 +108,7 @@ class Fixture {
     isStillFrom = still(area: from, stillLevel: StillLevel.hard);
     if (isStillFrom) return from;
     //헤딩 슛
-    if (Random().nextDouble() < 0.25 + buildUpBonus) {
+    if (Random().nextDouble() < 0.15 + buildUpBonus) {
       gall();
       return GroundArea();
     } else {
@@ -164,12 +164,12 @@ class Fixture {
     double ranNum = getPlayNumber();
 
     return switch (ranNum) {
-      < 0.05 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
+      < 0.02 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
+      < 0.06 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: successFront)),
       < 0.1 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: successFront)),
-      < 0.15 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: successFront)),
-      < 0.35 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
-      < 0.55 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
-      < 0.75 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: Vertical.center)),
+      < 0.20 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
+      < 0.40 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
+      < 0.70 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: Vertical.center)),
       _ => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: Vertical.center)),
     };
   }
@@ -179,11 +179,11 @@ class Fixture {
     double ranNum = getPlayNumber();
 
     return switch (ranNum) {
-      < 0.05 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
-      < 0.1 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: successFront)),
-      < 0.3 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
-      < 0.6 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
-      < 0.8 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: Vertical.center)),
+      < 0.02 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
+      < 0.06 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: successFront)),
+      < 0.1 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
+      < 0.40 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
+      < 0.7 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: Vertical.center)),
       _ => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: Vertical.center)),
     };
   }
@@ -193,10 +193,8 @@ class Fixture {
     double ranNum = getPlayNumber();
 
     return switch (ranNum) {
-      < 0.05 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: successFront)),
-      < 0.1 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: successFront)),
-      < 0.4 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
-      < 0.5 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
+      < 0.05 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: successFront)),
+      < 0.45 => longPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: successFront)),
       < 0.8 => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: Vertical.center)),
       _ => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: Vertical.center)),
     };
@@ -248,8 +246,8 @@ class Fixture {
     double ranNum = getPlayNumber();
 
     return switch (ranNum) {
-      < 0.7 => shoot(from: ballLocation),
-      _ => throughPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: ballLocation.v)),
+      < 0.4 => shoot(from: ballLocation),
+      _ => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.halfSpace, v: ballLocation.v)),
     };
   }
 
@@ -268,8 +266,8 @@ class Fixture {
     double ranNum = getPlayNumber();
 
     return switch (ranNum) {
-      < 0.4 => shoot(from: ballLocation),
-      < 0.75 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: ballLocation.v)),
+      < 0.2 => shoot(from: ballLocation),
+      < 0.6 => throughPass(from: ballLocation, to: GroundArea(h: Horizental.center, v: ballLocation.v)),
       _ => buildUpPass(from: ballLocation, to: GroundArea(h: Horizental.side, v: ballLocation.v)),
     };
   }

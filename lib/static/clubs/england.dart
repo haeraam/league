@@ -88,7 +88,7 @@ const List<Map> englandClubsJson = [
     'att': 40,
     'mid': 45,
     'def': 40,
-    'homeColor': ClubColor.orange,
+    'homeColor': ClubColor.blue,
   },
   {
     'name': 'Fulham',
