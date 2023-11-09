@@ -134,6 +134,31 @@ class Club {
     return '$name , $won , $drawn , $lost';
   }
 
+  Club.empty()
+      : name = '',
+        att = 0,
+        mid = 0,
+        def = 0,
+        playStyle = PlayStyle.none,
+        homeColor = ClubColor.black,
+        awayColor = ClubColor.black,
+        country = Country.england,
+        leagueTier = 0,
+        pts = 0,
+        won = 0,
+        drawn = 0,
+        lost = 0,
+        gf = 0,
+        ga = 0,
+        gd = 0,
+        winStack = 0,
+        noLoseStack = 0,
+        loseStack = 0,
+        noWinStack = 0,
+        attPercent = 0,
+        fundamental = 0,
+        ownPercent = 0.0;
+
   Club.fromJson(Map map)
       : name = map['name'],
         att = map['att'],

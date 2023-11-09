@@ -132,7 +132,6 @@ class ClubCard extends StatelessWidget {
                     width: 2,
                   ),
                   getTitleText(name: club.name, color: textColor),
-                  if (result != Result.none) Text(percent.toStringAsFixed(1))
                 ],
               ),
               const SizedBox(width: 4),

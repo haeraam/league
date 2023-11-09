@@ -1,7 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:leage_simulator/blocs/playing_fixture_bloc/playing_fixture_bloc.dart';
 import 'package:leage_simulator/components/club_card.dart';
 import 'package:leage_simulator/entities/fixture/fixture.dart';
 import 'package:leage_simulator/entities/club/club.dart';
@@ -59,6 +61,7 @@ class _GameCardState extends State<GameCard> {
               child: ElevatedButton(
                   onPressed: () async {
                     context.push('/game', extra: widget.fixture);
+                    context.read<PlayingFixtureBloc>().add(SetPayingFixtureEvent(fixture: widget.fixture));
                     // await widget.fixture.play();
                     // setState(() {});
                   },

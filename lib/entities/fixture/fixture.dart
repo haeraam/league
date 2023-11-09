@@ -338,6 +338,10 @@ class Fixture {
   String toString() {
     return '$homeClub , $awayClub';
   }
+
+  Fixture.empty()
+      : homeClub = Club.empty(),
+        awayClub = Club.empty();
 }
 
 class GroundArea {
